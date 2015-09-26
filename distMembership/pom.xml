@@ -58,6 +58,7 @@
             <configuration>
                 <sources>
                     <source>${project.build.directory}/generated-sources/thrift/</source>
+                    <source>${project.build.directory}/generated-sources/protobuf</source>
                 </sources>
             </configuration>
         </execution>
@@ -101,6 +102,11 @@
       <groupId>org.apache.thrift</groupId>
       <artifactId>libthrift</artifactId>
       <version>0.9.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>2.6.1</version>
     </dependency>
 <!-- 
     <dependency>

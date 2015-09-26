@@ -6,4 +6,6 @@ public class Membership {
 	public ByteBuffer GetMemeberList() {
 		return null;
 	}
+	
+	MembershipList m;
 }
