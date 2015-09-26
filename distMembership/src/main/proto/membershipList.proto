@@ -1,0 +1,14 @@
+package buffer;
+
+option java_package = "edu.uiuc.cs425";
+
+message Person {
+
+	repeated group Member = 1 {
+		
+		required string nodeId = 2;
+		required int32 heartbeatCounter = 3;
+		required int32 localTime = 4;
+	}
+
+}
