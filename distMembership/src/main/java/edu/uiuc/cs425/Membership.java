@@ -1,5 +1,9 @@
 package edu.uiuc.cs425;
 
-public class Membership {
+import java.nio.ByteBuffer;
 
+public class Membership {
+	public ByteBuffer GetMemeberList() {
+		return null;
+	}
 }
