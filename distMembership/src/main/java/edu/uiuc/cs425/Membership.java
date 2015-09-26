@@ -7,5 +7,10 @@ public class Membership {
 		return null;
 	}
 	
+	int MergeList(byte[] list_)
+	{
+		return Commons.SUCCESS;
+	}
+	
 	MembershipList m;
 }
