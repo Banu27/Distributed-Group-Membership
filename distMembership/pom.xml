@@ -78,7 +78,7 @@
             <configuration>
                 <sources>
                     <source>${project.build.directory}/generated-sources/thrift/</source>
-                    <source>${project.build.directory}/generated-sources/protobuf</source>
+                    <source>${project.build.directory}/generated-sources/protobuf/java</source>
                 </sources>
             </configuration>
         </execution>

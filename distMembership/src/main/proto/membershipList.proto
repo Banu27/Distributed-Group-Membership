@@ -2,7 +2,7 @@ package buffer;
 
 option java_package = "edu.uiuc.cs425";
 
-message Person {
+message MemberList {
 
 	repeated group Member = 1 {
 		
