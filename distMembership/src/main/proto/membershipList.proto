@@ -2,13 +2,15 @@ package buffer;
 
 option java_package = "edu.uiuc.cs425";
 
+message Member {
+		
+	required string nodeId = 2;
+	required int32 heartbeatCounter = 3;
+	required int32 localTime = 4;
+
+}
+
 message MemberList {
 
-	repeated group Member = 1 {
-		
-		required string nodeId = 2;
-		required int32 heartbeatCounter = 3;
-		required int32 localTime = 4;
-	}
-
+	repeated Member member = 1;
 }
