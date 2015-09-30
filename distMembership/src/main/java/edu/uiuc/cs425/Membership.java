@@ -15,7 +15,7 @@ import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 
 import edu.uiuc.cs425.MembershipList.Member;
-import edu.uiuc.cs425.MembershipList.MembershipList;
+import edu.uiuc.cs425.MembershipList.MemberList;
 
 public class Membership implements Runnable{
 	
@@ -23,7 +23,7 @@ public class Membership implements Runnable{
 	private int 							m_nTfail;
 	private Thread	 						m_oSuspectedNodeThread;
 	
-	public void InitializeMembershipListStruct()
+	public void InitializeMemberList()
 	{
 		m_oMembershipListStructArray = new ArrayList<MembershipListStruct>();
 	}
@@ -35,7 +35,7 @@ public class Membership implements Runnable{
 	
 	public MembershipList CreateObject()
 	{	 
-		MembershipList.Builder membershipListBuilder  = MembershipList.newBuilder();
+		MemberList.Builder memberListBuilder  = MemberList.newBuilder();
 		List<Member.Buider> memberBuilderList = new ArrayList<Member.Builder>();
 		for(int i=0; i< m_oMembershipListStructArray.size(); i++)
 		{
@@ -45,8 +45,8 @@ public class Membership implements Runnable{
 			member.setLocalTime(m_oMembershipListStructArray.get(i).GetLocalTime());
 			memberBuilderList.add(member.build());
 		}
-		membershipListBuilder.addAll(memberBuilderList);
-		return membershipListBuilder.build();
+		memberListBuilder.addAll(memberBuilderList);
+		return memberListBuilder.build();
 	}
 		
 	public byte [] GetMembershipList() 
@@ -110,8 +110,8 @@ public class Membership implements Runnable{
 	
 	public Object ObjectFromByteBuffer(byte[] buffer) throws Exception 
 	{
-		return null;
-		//return MembershipList.parseFrom(buffer);   //Need to make sure the message is the currect return type
+		//return null;
+		return MembershipList.parseFrom(buffer);   //Need to make sure the message is the currect return type
 	 }
 	
 	public void DetectFailure(String nodeId) // will be called from thread as of now.
@@ -123,6 +123,7 @@ public class Membership implements Runnable{
 	public void run()
 	{
 		//Wait and recheck hearbeat counter
+		
 	}
 
 	
