@@ -28,7 +28,7 @@ public class Membership implements Runnable{
 		m_oMembershipListStructArray = new ArrayList<MembershipListStruct>();
 	}
 	
-	public void AddMemberToStruct(String nodeId, int heartbeatCounter, int localTime)
+	public void AddMemberToStruct(String nodeId, int heartbeatCounter, long localTime)
 	{
 		m_oMembershipListStructArray.add(new MembershipListStruct(nodeId, heartbeatCounter, localTime));
 	}
@@ -43,15 +43,15 @@ public class Membership implements Runnable{
 			member.setNodeId(m_oMembershipListStructArray.get(i).GetNodeId());
 			member.setHeartbeatCounter(m_oMembershipListStructArray.get(i).GetHeartbeatCounter());
 			member.setLocalTime(m_oMembershipListStructArray.get(i).GetLocalTime());
-			memberBuilderList.add(member.build);
+			memberBuilderList.add(member.build());
 		}
 		memberListBuilder.addAll(memberBuilderList);
 		return memberListBuilder.build();
 	}
 		
-	public byte [] GetMemeberList() 
+	public byte [] GetMembershipList() 
 	{	
-		return objectToByteBuffer(CreateObject());
+		return ObjectToByteBuffer(CreateObject());
 	}
 	
 	public void ReceiveMembershipList(byte [] incomingListBuffer)
@@ -59,9 +59,10 @@ public class Membership implements Runnable{
 		MembershipList incomingList = ObjectFromByteBuffer(incomingListBuffer);
 	}
 	
-	int MergeList(MembershipList incomingList)
+	public int MergeList(byte [] incomingListBuffer)
 	{
 		//MemberList memberList = MemberList.parseFrom(new FileInputStream(fileName));
+		MembershipList incomingList = ObjectFromByteBuffer(incomingListBuffer);
 		for(Member member : incomingList.getMemberList())
 		{ 
 			boolean found = false;
@@ -89,41 +90,38 @@ public class Membership implements Runnable{
 			{
 				String nodeId = member.getNodeId();
 				int heartbeatCounter = member.getHeartbeatCounter();
-				int localTime = GetLocalTime(); //Our machine localTime
+				long localTime = GetLocalTime(); //Our machine localTime
 				AddMemberToStruct(nodeId, heartbeatCounter, localTime);
 			}
 			
 		}	
+		return Commons.SUCCESS;
 	}
 
 	public long GetLocalTime()
 	{
-		return new Date().getTime();
+		return 0;
+		//return new Date().getTime();
 	}
 	
-	public byte[] ObjectToByteBuffer(Object o) throws Exception 
+	public byte[] ObjectToByteBuffer(MembershipList membershipList) throws Exception 
 	{
-		return o.toByteArray();
+		return membershipList.ToByteArray();
 	}
 	
 	public Object ObjectFromByteBuffer(byte[] buffer) throws Exception 
 	{
-		return MembershipList,parseFrom(buffer);   //Need to make sure the message is the currect return type
+		return null;
+		//return MembershipList.parseFrom(buffer);   //Need to make sure the message is the currect return type
 	 }
 	
-	//WHAT IS THIS FUNCTION DOING??
-	private boolean sendMembershipList()
-	{
-		return ObjectToByteBuffer(/*Object!*/);	
-	}
-	
-	void DetectFailure(String nodeId) // will be called from thread as of now.
+	public void DetectFailure(String nodeId) // will be called from thread as of now.
 	{
 		m_oSuspectedNodeThread = new Thread(this);
     	m_oSuspectedNodeThread.start();
 	}
 	
-	void run()
+	public void run()
 	{
 		//Wait and recheck hearbeat counter
 		

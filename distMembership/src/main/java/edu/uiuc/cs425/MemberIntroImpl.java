@@ -26,9 +26,9 @@ public class MemberIntroImpl implements Iface {
 		return m_oIntroObj.JoinGroup();
 	}
 
-	public ByteBuffer GetMemebershipList() throws TException {
+	public ByteBuffer GetMembershipList() throws TException {
 		// TODO Auto-generated method stub
-		return m_oIntroObj.GetMemebershipList();
+		return m_oIntroObj.GetMembershipList();
 	}
 
 }

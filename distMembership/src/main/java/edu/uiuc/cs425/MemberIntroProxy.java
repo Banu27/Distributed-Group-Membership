@@ -40,9 +40,9 @@ public class MemberIntroProxy implements Iface {
 		return m_oClient.JoinGroup();
 	}
 
-	public ByteBuffer GetMemebershipList() throws TException {
+	public ByteBuffer GetMembershipList() throws TException {
 		// TODO Auto-generated method stub
-		return m_oClient.GetMemebershipList();
+		return m_oClient.GetMembershipList();
 	}
 
 }

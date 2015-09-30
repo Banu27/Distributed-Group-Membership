@@ -4,9 +4,9 @@ public class MembershipListStruct {
 
 	String 			m_sNodeId;
 	int 			m_nHeatbeatCounter;
-	int 			m_nLocalTime;
+	long 			m_nLocalTime;
 	
-	public MembershipListStruct(String nodeId, int heartbeatCounter, int localTime)
+	public MembershipListStruct(String nodeId, int heartbeatCounter, long localTime)
 	{
 		m_sNodeId = nodeId;
 		m_nHeatbeatCounter = heartbeatCounter;
@@ -28,7 +28,7 @@ public class MembershipListStruct {
 		return m_nHeatbeatCounter;
 	}
 	
-	public int GetLocalTime()
+	public long GetLocalTime()
 	{
 		return m_nLocalTime;
 	}

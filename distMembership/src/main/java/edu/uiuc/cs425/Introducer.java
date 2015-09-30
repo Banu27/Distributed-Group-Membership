@@ -19,10 +19,10 @@ public class Introducer implements Iface { //Why implements Iface??
 		return m_nSerialNumber;
 	}
 
-	public ByteBuffer GetMemebershipList() throws TException {
+	public ByteBuffer GetMembershipList() throws TException {
 		// TODO Auto-generated method stub
 		
-		return m_oMembershipObject.GetMemeberList();
+		return m_oMembershipObject.GetMemberList();
 		
 	}
 
