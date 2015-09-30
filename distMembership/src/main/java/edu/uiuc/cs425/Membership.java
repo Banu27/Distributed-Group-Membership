@@ -1,6 +1,8 @@
 package edu.uiuc.cs425;
 
 import java.nio.ByteBuffer;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.BufferedReader;
@@ -94,9 +96,9 @@ public class Membership implements Runnable{
 		}	
 	}
 
-	public int GetLocalTime()
+	public long GetLocalTime()
 	{
-		//DO
+		return new Date().getTime();
 	}
 	
 	public byte[] ObjectToByteBuffer(Object o) throws Exception 
@@ -110,7 +112,7 @@ public class Membership implements Runnable{
 	 }
 	
 	//WHAT IS THIS FUNCTION DOING??
-	private bool sendMembershipList()
+	private boolean sendMembershipList()
 	{
 		return ObjectToByteBuffer(/*Object!*/);	
 	}
@@ -124,6 +126,7 @@ public class Membership implements Runnable{
 	void run()
 	{
 		//Wait and recheck hearbeat counter
+		
 	}
 
 	
