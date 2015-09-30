@@ -28,6 +28,13 @@ public class CommServer {
 		m_oIntroImpl.SetIntoObj(oIntroducer);
 		
 		
+		Initialize(nHBPort,oMember);
+		return Commons.SUCCESS;
+	}
+	
+	
+	public int Initialize(int nHBPort, Membership oMember)
+	{
 		m_oHBRecvr 			= new HeartBeatReceiver();
 		if( Commons.FAILURE == m_oHBRecvr.Initialize(nHBPort))
 		{

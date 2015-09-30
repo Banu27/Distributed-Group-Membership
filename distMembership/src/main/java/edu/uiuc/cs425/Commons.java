@@ -24,6 +24,9 @@ public final class Commons {
 			"fa15-cs425-g01-07.cs.illinois.edu" };
 	public static final String username = "muthkmr2";
 	public static int aliveNumber = NUMBER_OF_VMS;
+	public static final String NODE_INTROCUDER = "intro";
+	public static final String NODE_PARTICIPANT = "part";
+
 	
 	//Floyd's - Random 
 	static Set<Integer> RandomK(int m, int max)

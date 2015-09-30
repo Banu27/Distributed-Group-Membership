@@ -69,8 +69,7 @@ public class Heartbeat implements Runnable {
 	
 	
 	public void run() {
-		// TODO Auto-generated method stub
-		
+		SendHBs();
 	}
 
 }
