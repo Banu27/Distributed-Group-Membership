@@ -14,6 +14,7 @@ import edu.uiuc.cs425.MemberIntroducer;
 public class MemberIntroProxy implements Iface {
 	
 	private MemberIntroducer.Client m_oClient;
+	private TTransport transport;
 	
 	public MemberIntroProxy()
 	{
@@ -22,7 +23,7 @@ public class MemberIntroProxy implements Iface {
 	
 	public int Initialize(String sIP,int nPort)
 	{
-		TTransport transport = new TSocket(sIP, nPort);
+		transport = new TSocket(sIP, nPort);
 	    try {
 			transport.open();
 		} catch (TTransportException e) {
@@ -45,4 +46,8 @@ public class MemberIntroProxy implements Iface {
 		return m_oClient.GetMembershipList();
 	}
 
+	public void Close()
+	{
+		transport.close();
+	}
 }

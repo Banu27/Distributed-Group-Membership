@@ -2,6 +2,9 @@ package edu.uiuc.cs425;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+
+import org.apache.thrift.TException;
 
 public class Controller {
 	
@@ -81,7 +84,7 @@ public class Controller {
 		{
 			m_oCommServ.StartIntroService(m_oConfig.IntroducerPort());
 		}
-		// bring up the beartbeat receiver
+		// bring up the heartbeat receiver
 		m_oCommServ.StartHeartBeatRecvr();
 		
 		// start heart beating thread
@@ -93,6 +96,45 @@ public class Controller {
 		m_FailDetThread.start();
 		
 		return Commons.SUCCESS;
+	}
+	
+	public int IntroduceSelf()
+	{
+		MemberIntroProxy proxy = new MemberIntroProxy();
+		if (Commons.FAILURE == proxy.Initialize(m_oConfig.IntroducerIP(), m_oConfig.IntroducerPort()))
+		{
+			System.out.println("Failed to initialize proxy to the introducer");
+			return Commons.FAILURE;
+		}
+		int serialNo;
+		try {
+			serialNo = proxy.JoinGroup();
+		} catch (TException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return Commons.FAILURE;
+		}
+		
+		m_oMember.AddSelf(serialNo);
+		ByteBuffer buf;
+		try {
+			buf = proxy.GetMembershipList();
+		} catch (TException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			return Commons.FAILURE;
+		}
+		byte[] bufArr = new byte[buf.remaining()];
+		buf.get(bufArr);
+		try {
+			m_oMember.MergeList(bufArr);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return Commons.FAILURE;
+		}
+		return Commons.SUCCESS;
+		
 	}
 	
 	public void WaitForServicesToEnd()
