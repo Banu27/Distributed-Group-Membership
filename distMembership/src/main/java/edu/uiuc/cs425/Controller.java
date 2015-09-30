@@ -1,5 +1,8 @@
 package edu.uiuc.cs425;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 public class Controller {
 	
 	private ConfigAccessor  m_oConfig;
@@ -20,9 +23,9 @@ public class Controller {
 		m_oHeartbeat    = new Heartbeat();
 	}
 	
-	public int Initialize(String sXML, String sNodeType)
+	public int Initialize(String sXML)
 	{
-		m_sNodeType = sNodeType;
+		
 		
 		if( Commons.FAILURE == m_oConfig.Initialize(sXML))
 		{
@@ -30,9 +33,21 @@ public class Controller {
 			return Commons.FAILURE;
 		}
 		
+		
+		try {
+			if( InetAddress.getLocalHost().getHostAddress() == m_oConfig.IntroducerIP())
+				m_sNodeType = Commons.NODE_INTROCUDER;
+			else
+				m_sNodeType = Commons.NODE_PARTICIPANT;
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return Commons.FAILURE;
+		}
+		
 		m_oMember.Initialize();
 		
-		if(sNodeType == Commons.NODE_INTROCUDER)
+		if(m_sNodeType == Commons.NODE_INTROCUDER)
 		{
 			m_oIntroducer = new Introducer();
 			if( Commons.FAILURE == m_oCommServ.Initialize(m_oConfig.HeartBeatPort(), 
