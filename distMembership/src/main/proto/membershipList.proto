@@ -10,7 +10,7 @@ message Member {
 
 }
 
-message MemberList {
+message MembershipList {
 
 	repeated Member member = 1;
 }

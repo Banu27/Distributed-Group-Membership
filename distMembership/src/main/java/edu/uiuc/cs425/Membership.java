@@ -1,7 +1,7 @@
 package edu.uiuc.cs425;
 
 import java.nio.ByteBuffer;
-import java.sql.Date;
+import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 
 import edu.uiuc.cs425.MembershipList.Member;
-import edu.uiuc.cs425.MembershipList.MemberList;
+import edu.uiuc.cs425.MembershipList.MembershipList;
 
 public class Membership implements Runnable{
 	
@@ -23,7 +23,7 @@ public class Membership implements Runnable{
 	private int 							m_nTfail;
 	private Thread	 						m_oSuspectedNodeThread;
 	
-	public void InitializeMemberList()
+	public void InitializeMembershipListStruct()
 	{
 		m_oMembershipListStructArray = new ArrayList<MembershipListStruct>();
 	}
@@ -35,7 +35,7 @@ public class Membership implements Runnable{
 	
 	public MembershipList CreateObject()
 	{	 
-		MemberList.Builder memberListBuilder  = MemberList.newBuilder();
+		MembershipList.Builder membershipListBuilder  = MembershipList.newBuilder();
 		List<Member.Buider> memberBuilderList = new ArrayList<Member.Builder>();
 		for(int i=0; i< m_oMembershipListStructArray.size(); i++)
 		{
@@ -45,8 +45,8 @@ public class Membership implements Runnable{
 			member.setLocalTime(m_oMembershipListStructArray.get(i).GetLocalTime());
 			memberBuilderList.add(member.build());
 		}
-		memberListBuilder.addAll(memberBuilderList);
-		return memberListBuilder.build();
+		membershipListBuilder.addAll(memberBuilderList);
+		return membershipListBuilder.build();
 	}
 		
 	public byte [] GetMembershipList() 
@@ -100,8 +100,7 @@ public class Membership implements Runnable{
 
 	public long GetLocalTime()
 	{
-		return 0;
-		//return new Date().getTime();
+		return new Date().getTime();
 	}
 	
 	public byte[] ObjectToByteBuffer(MembershipList membershipList) throws Exception 
@@ -124,7 +123,6 @@ public class Membership implements Runnable{
 	public void run()
 	{
 		//Wait and recheck hearbeat counter
-		
 	}
 
 	
