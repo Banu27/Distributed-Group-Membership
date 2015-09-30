@@ -2,9 +2,14 @@ package edu.uiuc.cs425;
 
 import java.nio.ByteBuffer;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,37 +24,60 @@ import edu.uiuc.cs425.MembershipList.MemberList;
 
 public class Membership implements Runnable{
 	
-	private List<MembershipListStruct> 	    m_oMembershipListStructArray;
-	private int 							m_nTfail;
-	private Thread	 						m_oSuspectedNodeThread;
+	private List<MembershipListStruct> 	    			m_oMembershipListStructArray;
+	private HashMap<Integer,MembershipListStruct> 		m_oHmap;
+	private long  										m_nTfail;
+	private Thread	 									m_oSuspectedNodeThread;
+	private int 										m_nSerialNumber;
+	private String 										m_nIP;
+	private int 										m_nMyHeartBeat;
 	
-	public void InitializeMemberList()
+	public void Initialize()
 	{
+		m_oHmap = new HashMap<Integer, MembershipListStruct>();
+		m_nMyHeartBeat = 1;
 		m_oMembershipListStructArray = new ArrayList<MembershipListStruct>();
 	}
 	
-	public void AddMemberToStruct(String nodeId, int heartbeatCounter, long localTime)
+	public void AddSelf(int serialNumber)
 	{
-		m_oMembershipListStructArray.add(new MembershipListStruct(nodeId, heartbeatCounter, localTime));
+		m_nSerialNumber = serialNumber;
+		AddMemberToStruct(m_nIP, m_nMyHeartBeat, GetMyLocalTime(), m_nSerialNumber);
+	}
+	
+	public void AddMemberToStruct(String IP, int heartbeatCounter, long localTime, int serialNumber)
+	{
+		//m_oMembershipListStructArray.add(new MembershipListStruct(nodeId, heartbeatCounter, localTime, serialNumber));
+		MembershipListStruct newMember = new MembershipListStruct(IP, heartbeatCounter, localTime, serialNumber);
+		m_oHmap.put(serialNumber,newMember);
+	}
+	
+	public void IncrementHeartbeat()
+	{
+		m_nMyHeartBeat = m_nMyHeartBeat + 1;
 	}
 	
 	public MembershipList CreateObject()
 	{	 
 		MemberList.Builder memberListBuilder  = MemberList.newBuilder();
 		List<Member.Buider> memberBuilderList = new ArrayList<Member.Builder>();
-		for(int i=0; i< m_oMembershipListStructArray.size(); i++)
-		{
-			Member.Builder member = Member.newBuilder();
-			member.setNodeId(m_oMembershipListStructArray.get(i).GetNodeId());
-			member.setHeartbeatCounter(m_oMembershipListStructArray.get(i).GetHeartbeatCounter());
-			member.setLocalTime(m_oMembershipListStructArray.get(i).GetLocalTime());
-			memberBuilderList.add(member.build());
-		}
+		Set<Entry<Integer, MembershipListStruct>> set = m_oHmap.entrySet();
+	    Iterator<Entry<Integer, MembershipListStruct>> iterator = set.iterator();
+	    while(iterator.hasNext()) {
+	         Map.Entry mentry = (Map.Entry)iterator.next();
+	         MembershipListStruct memberStruct = m_oHmap.get(mentry.getKey());
+	         Member.Builder member = Member.newBuilder();
+	         member.setHeartbeatCounter(memberStruct.GetHeartbeatCounter());
+	         member.setIP(memberStruct.GetIP());
+	         member.setLocalTime(memberStruct.GetLocalTime());
+	         member.setSerialNumber(memberStruct.GetSerialNumber());
+	         memberBuilderList.add(member.build());
+	    }	      
 		memberListBuilder.addAll(memberBuilderList);
 		return memberListBuilder.build();
 	}
 		
-	public byte [] GetMembershipList() 
+	public byte [] GetMemberList() 
 	{	
 		return ObjectToByteBuffer(CreateObject());
 	}
@@ -61,44 +89,39 @@ public class Membership implements Runnable{
 	
 	public int MergeList(byte [] incomingListBuffer)
 	{
-		//MemberList memberList = MemberList.parseFrom(new FileInputStream(fileName));
 		MembershipList incomingList = ObjectFromByteBuffer(incomingListBuffer);
 		for(Member member : incomingList.getMemberList())
 		{ 
 			boolean found = false;
-			for(int i=0; i< m_oMembershipListStructArray.size(); i++)
+			if(m_oHmap.containsKey(member.getSerialNumber()))
 			{
-				if(member.getNodeId() == m_oMembershipListStructArray.get(i).GetNodeId())
+				MembershipListStruct matchedMember = m_oHmap.get(member.getSerialNumber());
+				if(member.getHeartbeatCounter() == matchedMember.GetHeartbeatCounter())
 				{
-					found = true;
-					MembershipListStruct matchedMember = m_oMembershipListStructArray.get(i);
-					if(member.getHeartbeatCounter() == matchedMember.GetHeartbeatCounter())
+					if(matchedMember.GetLocalTime() > m_nTfail)
 					{
-						if(matchedMember.GetLocalTime() > m_nTfail)
-						{
-							DetectFailure(matchedMember.GetNodeId());
-						}
-					}
-					else
-					{
-						matchedMember.ResetHeartbeatCounter(member.getHeatbeatCounter());
+						DetectFailure(matchedMember.GetIP());
 					}
 				}
-				break;
+				else
+				{
+					matchedMember.ResetHeartbeatCounter(member.getHeatbeatCounter());
+				}
 			}
-			if (found == false)
+			else
 			{
-				String nodeId = member.getNodeId();
+				String IP = member.getIP();
 				int heartbeatCounter = member.getHeartbeatCounter();
-				long localTime = GetLocalTime(); //Our machine localTime
-				AddMemberToStruct(nodeId, heartbeatCounter, localTime);
+				long localTime = GetMyLocalTime(); //Our machine localTime
+				int serialNumber = member.getSerialNumber();
+				AddMemberToStruct(nodeId, heartbeatCounter, localTime, serialNumber);
 			}
+		}
 			
-		}	
 		return Commons.SUCCESS;
 	}
 
-	public long GetLocalTime()
+	public long GetMyLocalTime()
 	{
 		return new Date().getTime();
 	}
@@ -110,7 +133,6 @@ public class Membership implements Runnable{
 	
 	public Object ObjectFromByteBuffer(byte[] buffer) throws Exception 
 	{
-		//return null;
 		return MembershipList.parseFrom(buffer);   //Need to make sure the message is the currect return type
 	 }
 	
@@ -120,12 +142,46 @@ public class Membership implements Runnable{
     	m_oSuspectedNodeThread.start();
 	}
 	
+	public String GetIP(int serialNumber)
+	{
+		return m_oHmap.get(serialNumber).GetIP();
+	}
+	
 	public void run()
 	{
-		//Wait and recheck hearbeat counter
-		
+		while(true) {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				
+				e.printStackTrace();
+			}
+			Set<Entry<Integer, MembershipListStruct>> set = m_oHmap.entrySet();
+			Iterator<Entry<Integer, MembershipListStruct>> iterator = set.iterator();
+			while(iterator.hasNext()) {
+				Map.Entry mentry = (Map.Entry)iterator.next();
+				MembershipListStruct memberStruct = m_oHmap.get(mentry.getKey());
+				if(memberStruct.IsSuspect())
+				{
+					if(memberStruct.GetLocalTime() - GetMyLocalTime() > 2*m_nTfail)
+					{
+						m_oHmap.remove(mentry.getKey());
+					}
+				}
+				else
+				{
+					if(memberStruct.GetLocalTime() - GetMyLocalTime() > m_nTfail)
+					{
+						memberStruct.setAsSuspect();
+					}
+				}
+			}
+		}
 	}
 
-	
-	
+	 public ArrayList<Integer> getM_oHmap() 
+	 {
+		 return new ArrayList<Integer>(m_oHmap.keySet());
+	 }
 }

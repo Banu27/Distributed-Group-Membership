@@ -2,15 +2,19 @@ package edu.uiuc.cs425;
 
 public class MembershipListStruct {
 
-	String 			m_sNodeId;
+	String 			m_nIP;
 	int 			m_nHeatbeatCounter;
 	long 			m_nLocalTime;
+	int 			m_nSerialNumber;
+	boolean 		m_bSuspect;
 	
-	public MembershipListStruct(String nodeId, int heartbeatCounter, long localTime)
+	public MembershipListStruct(String IP, int heartbeatCounter, long localTime, int serialNumber)
 	{
-		m_sNodeId = nodeId;
+		m_nIP = IP;
 		m_nHeatbeatCounter = heartbeatCounter;
 		m_nLocalTime = localTime;
+		m_nSerialNumber = serialNumber;
+		m_bSuspect = false;
 	}
 	
 	public void ResetLocalTime(int localTime)
@@ -28,14 +32,28 @@ public class MembershipListStruct {
 		return m_nHeatbeatCounter;
 	}
 	
+	public int GetSerialNumber()
+	{
+		return m_nSerialNumber;
+	}
 	public long GetLocalTime()
 	{
 		return m_nLocalTime;
 	}
 	
-	public String GetNodeId()
+	public boolean IsSuspect()
 	{
-		return m_sNodeId;
+		return m_bSuspect;
+	}
+		
+	public void setAsSuspect()
+	{
+		m_bSuspect = true;
+	}
+	
+	public String GetIP()
+	{
+		return m_nIP;
 	}
 	
 }
