@@ -57,14 +57,22 @@
         </configuration>
         <executions>
           <execution>
+          <id>proto-sources</id>
+          <phase>generate-sources</phase>
             <goals>
               <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+          	<id>proto-test-sources</id>
+         	<phase>generate-test-sources</phase>
+            <goals>
               <goal>test-compile</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
-  		<plugin>
+  <plugin>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>build-helper-maven-plugin</artifactId>
     <version>1.9.1</version>
@@ -77,26 +85,8 @@
             </goals>
             <configuration>
                 <sources>
-                    <source>${project.build.directory}/generated-sources/thrift/</source>
-                </sources>
-            </configuration>
-        </execution>
-    </executions>
- </plugin>
- <plugin>
-    <groupId>org.codehaus.mojo</groupId>
-    <artifactId>build-helper-maven-plugin</artifactId>
-    <version>1.9.1</version>
-    <executions>
-        <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-                <goal>add-source</goal>
-            </goals>
-            <configuration>
-                <sources>
-                    <source>${project.build.directory}/generated-sources/protobuf/</source>
+                    <source>${project.build.directory}/generated-sources/thrift</source>
+                    <source>${project.build.directory}/generated-sources/protobuf/java</source>
                 </sources>
             </configuration>
         </execution>

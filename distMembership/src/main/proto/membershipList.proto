@@ -7,8 +7,7 @@ message Member {
 	required string IP = 2;
 	required int32 heartbeat_counter = 3;
 	required int64 local_time = 4;
-	required int32 serial_number = 5
-
+	required int32 serial_number = 5;
 }
 
 message MemberList {

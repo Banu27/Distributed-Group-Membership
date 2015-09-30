@@ -57,10 +57,10 @@ public class Membership implements Runnable{
 		m_nMyHeartBeat = m_nMyHeartBeat + 1;
 	}
 	
-	public MembershipList CreateObject()
+	public MemberList CreateObject()
 	{	 
 		MemberList.Builder memberListBuilder  = MemberList.newBuilder();
-		List<Member.Buider> memberBuilderList = new ArrayList<Member.Builder>();
+		List<Member> memberList = new ArrayList<Member>();
 		Set<Entry<Integer, MembershipListStruct>> set = m_oHmap.entrySet();
 	    Iterator<Entry<Integer, MembershipListStruct>> iterator = set.iterator();
 	    while(iterator.hasNext()) {
@@ -71,25 +71,26 @@ public class Membership implements Runnable{
 	         member.setIP(memberStruct.GetIP());
 	         member.setLocalTime(memberStruct.GetLocalTime());
 	         member.setSerialNumber(memberStruct.GetSerialNumber());
-	         memberBuilderList.add(member.build());
+	         memberList.add(member.build());
 	    }	      
-		memberListBuilder.addAll(memberBuilderList);
+		memberListBuilder.addAllMember(memberList);
 		return memberListBuilder.build();
 	}
 		
-	public byte [] GetMemberList() 
+	public byte [] GetMemberList() throws Exception 
 	{	
 		return ObjectToByteBuffer(CreateObject());
 	}
 	
-	public void ReceiveMembershipList(byte [] incomingListBuffer)
+	// TODO: Is this method needed?
+	/*public void ReceiveMembershipList(byte [] incomingListBuffer)
 	{
 		MembershipList incomingList = ObjectFromByteBuffer(incomingListBuffer);
-	}
+	}*/
 	
-	public int MergeList(byte [] incomingListBuffer)
+	public int MergeList(byte [] incomingListBuffer) throws Exception
 	{
-		MembershipList incomingList = ObjectFromByteBuffer(incomingListBuffer);
+		MemberList incomingList = ObjectFromByteBuffer(incomingListBuffer);
 		for(Member member : incomingList.getMemberList())
 		{ 
 			boolean found = false;
@@ -105,7 +106,7 @@ public class Membership implements Runnable{
 				}
 				else
 				{
-					matchedMember.ResetHeartbeatCounter(member.getHeatbeatCounter());
+					matchedMember.ResetHeartbeatCounter(member.getHeartbeatCounter());
 				}
 			}
 			else
@@ -114,7 +115,7 @@ public class Membership implements Runnable{
 				int heartbeatCounter = member.getHeartbeatCounter();
 				long localTime = GetMyLocalTime(); //Our machine localTime
 				int serialNumber = member.getSerialNumber();
-				AddMemberToStruct(nodeId, heartbeatCounter, localTime, serialNumber);
+				AddMemberToStruct(IP, heartbeatCounter, localTime, serialNumber);
 			}
 		}
 			
@@ -126,14 +127,14 @@ public class Membership implements Runnable{
 		return new Date().getTime();
 	}
 	
-	public byte[] ObjectToByteBuffer(MembershipList membershipList) throws Exception 
+	public byte[] ObjectToByteBuffer(MemberList membershipList) throws Exception 
 	{
-		return membershipList.ToByteArray();
+		return membershipList.toByteArray();
 	}
 	
-	public Object ObjectFromByteBuffer(byte[] buffer) throws Exception 
+	public MemberList ObjectFromByteBuffer(byte[] buffer) throws Exception 
 	{
-		return MembershipList.parseFrom(buffer);   //Need to make sure the message is the currect return type
+		return MemberList.parseFrom(buffer);   //Need to make sure the message is the currect return type
 	 }
 	
 	public void DetectFailure(String nodeId) // will be called from thread as of now.
@@ -180,7 +181,7 @@ public class Membership implements Runnable{
 		}
 	}
 
-	 public ArrayList<Integer> getM_oHmap() 
+	 public ArrayList<Integer> GetMemberIds() 
 	 {
 		 return new ArrayList<Integer>(m_oHmap.keySet());
 	 }

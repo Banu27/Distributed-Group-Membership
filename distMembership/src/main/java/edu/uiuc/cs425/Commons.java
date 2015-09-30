@@ -3,6 +3,9 @@ package edu.uiuc.cs425;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 public final class Commons {
 	public static final int SUCCESS = 0;
@@ -21,6 +24,23 @@ public final class Commons {
 			"fa15-cs425-g01-07.cs.illinois.edu" };
 	public static final String username = "muthkmr2";
 	public static int aliveNumber = NUMBER_OF_VMS;
+	
+	//Floyd's - Random 
+	static Set<Integer> RandomK(int m, int max)
+	{
+		Random rnd = new Random();
+		int n = max;
+		HashSet<Integer> res = new HashSet<Integer>(m);
+	    for(int i = n - m; i < n; i++){
+	        int item = rnd.nextInt(i + 1);
+	        if (res.contains(item))
+	            res.add(i);
+	        else
+	            res.add(item); 
+	    }
+	    return res;
+	}
+	
 	
 	public static void SystemCommand(String[] command) {
 		
@@ -51,7 +71,6 @@ public final class Commons {
             System.exit(-1);
 		}
 	}
-	
 	
 	
 }

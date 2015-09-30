@@ -22,7 +22,13 @@ public class Introducer implements Iface { //Why implements Iface??
 	public ByteBuffer GetMembershipList() throws TException {
 		// TODO Auto-generated method stub
 		
-		return m_oMembershipObject.GetMemberList();
+		try {
+			return ByteBuffer.wrap(m_oMembershipObject.GetMemberList());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();	
+			throw new TException();
+		}
 		
 	}
 

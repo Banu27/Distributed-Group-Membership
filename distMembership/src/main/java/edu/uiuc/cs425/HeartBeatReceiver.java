@@ -53,7 +53,13 @@ public class HeartBeatReceiver {
 				e.printStackTrace();
 			}
 			 byte[] memberShipBlob = Arrays.copyOf(m_msgBuffer, m_packet.getLength());
-			 m_oMembership.MergeList(memberShipBlob);
+			 try {
+				m_oMembership.MergeList(memberShipBlob);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			}
              m_packet.setLength(m_msgBuffer.length);
          }
 	}
