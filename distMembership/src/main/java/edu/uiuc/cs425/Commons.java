@@ -14,11 +14,11 @@ public final class Commons {
 	public static final int NETWORK_THREAD_COUNT = 4;
 	public static final int WORKER_THREAD_COUNT = 8;
 	public static final int MASTER = 0;
-	public static final int NUMBER_OF_VMS = 7;
+	public static final int NUMBER_OF_VMS = 6;
 	public static final String [] VM_NAMES = {"fa15-cs425-g01-01.cs.illinois.edu", 
 			"fa15-cs425-g01-02.cs.illinois.edu",
 			"fa15-cs425-g01-03.cs.illinois.edu",
-			"fa15-cs425-g01-04.cs.illinois.edu",
+			//"fa15-cs425-g01-04.cs.illinois.edu",
 			"fa15-cs425-g01-05.cs.illinois.edu",
 			"fa15-cs425-g01-06.cs.illinois.edu",
 			"fa15-cs425-g01-07.cs.illinois.edu" };

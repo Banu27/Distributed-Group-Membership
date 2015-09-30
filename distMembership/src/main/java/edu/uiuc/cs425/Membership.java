@@ -24,7 +24,6 @@ import edu.uiuc.cs425.MembershipList.MemberList;
 
 public class Membership implements Runnable{
 	
-	private List<MembershipListStruct> 	    			m_oMembershipListStructArray;
 	private HashMap<Integer,MembershipListStruct> 		m_oHmap;
 	private long  										m_nTfail;
 	private Thread	 									m_oSuspectedNodeThread;
@@ -36,7 +35,7 @@ public class Membership implements Runnable{
 	{
 		m_oHmap = new HashMap<Integer, MembershipListStruct>();
 		m_nMyHeartBeat = 1;
-		m_oMembershipListStructArray = new ArrayList<MembershipListStruct>();
+		DetectFailure();
 	}
 	
 	public void AddSelf(int serialNumber)
@@ -47,7 +46,6 @@ public class Membership implements Runnable{
 	
 	public void AddMemberToStruct(String IP, int heartbeatCounter, long localTime, int serialNumber)
 	{
-		//m_oMembershipListStructArray.add(new MembershipListStruct(nodeId, heartbeatCounter, localTime, serialNumber));
 		MembershipListStruct newMember = new MembershipListStruct(IP, heartbeatCounter, localTime, serialNumber);
 		m_oHmap.put(serialNumber,newMember);
 	}
@@ -82,12 +80,6 @@ public class Membership implements Runnable{
 		return ObjectToByteBuffer(CreateObject());
 	}
 	
-	// TODO: Is this method needed?
-	/*public void ReceiveMembershipList(byte [] incomingListBuffer)
-	{
-		MembershipList incomingList = ObjectFromByteBuffer(incomingListBuffer);
-	}*/
-	
 	public int MergeList(byte [] incomingListBuffer) throws Exception
 	{
 		MemberList incomingList = ObjectFromByteBuffer(incomingListBuffer);
@@ -99,10 +91,7 @@ public class Membership implements Runnable{
 				MembershipListStruct matchedMember = m_oHmap.get(member.getSerialNumber());
 				if(member.getHeartbeatCounter() == matchedMember.GetHeartbeatCounter())
 				{
-					if(matchedMember.GetLocalTime() > m_nTfail)
-					{
-						DetectFailure(matchedMember.GetIP());
-					}
+					break;
 				}
 				else
 				{
@@ -137,7 +126,7 @@ public class Membership implements Runnable{
 		return MemberList.parseFrom(buffer);   //Need to make sure the message is the currect return type
 	 }
 	
-	public void DetectFailure(String nodeId) // will be called from thread as of now.
+	public void DetectFailure() // will be called from thread as of now.
 	{
 		m_oSuspectedNodeThread = new Thread(this);
     	m_oSuspectedNodeThread.start();
