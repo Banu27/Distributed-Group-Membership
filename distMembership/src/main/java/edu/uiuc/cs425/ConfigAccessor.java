@@ -88,8 +88,8 @@ public class ConfigAccessor {
 			return Commons.FAILURE;
 		}
 				
-		doc.getDocumentElement().normalize();
-		NodeList nList = doc.getChildNodes();
+		Node root = doc.getDocumentElement();
+		NodeList nList = root.getChildNodes();
 
 		for (int temp = 0; temp < nList.getLength(); temp++) {
 			Node nNode = nList.item(temp);
