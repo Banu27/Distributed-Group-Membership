@@ -37,6 +37,7 @@ public class Controller {
 		}
 		
 		System.out.println("IP: " + InetAddress.getLocalHost().getHostAddress());
+		System.out.println("Intro IP: " + m_oConfig.IntroducerIP());
 		
 		try {
 			if( InetAddress.getLocalHost().getHostAddress() == m_oConfig.IntroducerIP())
