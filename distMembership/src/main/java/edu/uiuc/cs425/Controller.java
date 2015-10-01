@@ -26,7 +26,7 @@ public class Controller {
 		m_oHeartbeat    = new Heartbeat();
 	}
 	
-	public int Initialize(String sXML) throws UnknownHostException
+	public int Initialize(String sXML)
 	{
 		
 		
@@ -36,19 +36,24 @@ public class Controller {
 			return Commons.FAILURE;
 		}
 		
-		System.out.println("IP: " + InetAddress.getLocalHost().getHostAddress());
-		System.out.println("Intro IP: " + m_oConfig.IntroducerIP());
-		
+		String introIP = m_oConfig.IntroducerIP();
+		String hostIP = null;
 		try {
-			if( InetAddress.getLocalHost().getHostAddress() == m_oConfig.IntroducerIP())
-				m_sNodeType = Commons.NODE_INTROCUDER;
-			else
-				m_sNodeType = Commons.NODE_PARTICIPANT;
-		} catch (UnknownHostException e) {
+			hostIP  = InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e1) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return Commons.FAILURE;
+			e1.printStackTrace();
 		}
+		
+		System.out.println("IP: " + hostIP);
+		System.out.println("Intro IP: " + introIP);
+		
+		
+		if(introIP.equals(hostIP))
+			m_sNodeType = Commons.NODE_INTROCUDER;
+		else
+			m_sNodeType = Commons.NODE_PARTICIPANT;
+		
 		
 		System.out.println("Nodetype: " + m_sNodeType);
 		
