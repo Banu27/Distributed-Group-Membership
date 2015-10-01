@@ -28,6 +28,8 @@ public class App
 		
 		m_oController.StartAllServices();
 		
+		m_oController.IntroduceSelf();
+		
 		m_oController.WaitForServicesToEnd();
 		
 		
