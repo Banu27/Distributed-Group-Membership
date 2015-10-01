@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MembershipConfig>
+   <Introducer ip="10.16.8.85" port="8342" />
+   <Heartbeat port="7954" interval="2000" gossipNodes="3" /> 
+   <Failure interval="2000" />
+</MembershipConfig>
