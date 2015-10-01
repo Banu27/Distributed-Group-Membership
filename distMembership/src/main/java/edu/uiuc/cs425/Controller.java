@@ -59,7 +59,7 @@ public class Controller {
 		
 		m_oMember.Initialize();
 		
-		if(m_sNodeType == Commons.NODE_INTROCUDER)
+		if(m_sNodeType.equals(Commons.NODE_INTROCUDER))
 		{
 			m_oIntroducer = new Introducer();
 			if( Commons.FAILURE == m_oCommServ.Initialize(m_oConfig.HeartBeatPort(), 
@@ -89,7 +89,7 @@ public class Controller {
 	
 	public int StartAllServices()
 	{
-		if( m_sNodeType == Commons.NODE_INTROCUDER)
+		if( m_sNodeType.equals(Commons.NODE_INTROCUDER))
 		{
 			m_oCommServ.StartIntroService(m_oConfig.IntroducerPort());
 		}
@@ -123,24 +123,27 @@ public class Controller {
 			e.printStackTrace();
 			return Commons.FAILURE;
 		}
-		
+		// checkpointing will change this part of the logic
 		m_oMember.AddSelf(serialNo);
-		ByteBuffer buf;
-		try {
-			buf = proxy.GetMembershipList();
-		} catch (TException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			return Commons.FAILURE;
-		}
-		byte[] bufArr = new byte[buf.remaining()];
-		buf.get(bufArr);
-		try {
-			m_oMember.MergeList(bufArr);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return Commons.FAILURE;
+		if(m_sNodeType.equals(Commons.NODE_PARTICIPANT))
+		{
+			ByteBuffer buf;
+			try {
+				buf = proxy.GetMembershipList();
+			} catch (TException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				return Commons.FAILURE;
+			}
+			byte[] bufArr = new byte[buf.remaining()];
+			buf.get(bufArr);
+			try {
+				m_oMember.MergeList(bufArr);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return Commons.FAILURE;
+			}
 		}
 		return Commons.SUCCESS;
 		
