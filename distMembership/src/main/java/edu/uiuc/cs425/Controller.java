@@ -26,7 +26,7 @@ public class Controller {
 		m_oHeartbeat    = new Heartbeat();
 	}
 	
-	public int Initialize(String sXML)
+	public int Initialize(String sXML) throws UnknownHostException
 	{
 		
 		
@@ -36,6 +36,7 @@ public class Controller {
 			return Commons.FAILURE;
 		}
 		
+		System.out.println("IP: " + InetAddress.getLocalHost().getHostAddress());
 		
 		try {
 			if( InetAddress.getLocalHost().getHostAddress() == m_oConfig.IntroducerIP())
