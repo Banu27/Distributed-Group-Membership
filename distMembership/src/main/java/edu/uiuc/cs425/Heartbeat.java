@@ -19,6 +19,10 @@ public class Heartbeat implements Runnable {
 		m_nGossipNodes			= oConfig.GossipNodes();
 		m_nGossipInterval		= oConfig.HeartBeatInterval();
 		m_nHBSendPort			= oConfig.HeartBeatPort();
+		System.out.println("Initialized HeartBeat: GossipNodes=" + String.valueOf(m_nGossipNodes)
+					+ " GossipInterval=" + String.valueOf(m_nGossipInterval) +
+					" m_nHBSendPort=" + String.valueOf(m_nHBSendPort));
+		
 		return Commons.SUCCESS;
 	}
 	
@@ -37,7 +41,10 @@ public class Heartbeat implements Runnable {
 			m_oMship.IncrementHeartbeat();
 			ArrayList<Integer> vSerialNumbers = m_oMship.GetMemberIds();
 			int size = vSerialNumbers.size();
-			Set<Integer> rands = Commons.RandomK(m_nGossipNodes,size);
+			int currGossip = m_nGossipNodes;
+			if(size < m_nGossipNodes) currGossip = size;
+					
+			Set<Integer> rands = Commons.RandomK(currGossip,size);
 			
 			for (Integer i : rands)
 			{

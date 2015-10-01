@@ -28,6 +28,15 @@ public class App
 		
 		m_oController.StartAllServices();
 		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
+		
 		m_oController.IntroduceSelf();
 		
 		m_oController.WaitForServicesToEnd();
