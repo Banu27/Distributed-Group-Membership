@@ -48,6 +48,8 @@ public class Controller {
 			return Commons.FAILURE;
 		}
 		
+		System.out.println("Nodetype: " + m_sNodeType);
+		
 		m_oMember.Initialize();
 		
 		if(m_sNodeType == Commons.NODE_INTROCUDER)
