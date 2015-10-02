@@ -100,15 +100,18 @@ public class Membership implements Runnable{
 				MembershipListStruct matchedMember = m_oHmap.get(member.getSerialNumber());
 				if(member.getHeartbeatCounter() == matchedMember.GetHeartbeatCounter())
 				{
-					break;
+					if(member.GetSerialNumber() == matchedMember.GetSerialNumber()
+							matchedMember.ResetLocalTime(GetMyLocalTime());
 				}
 				else
 				{
 					matchedMember.ResetHeartbeatCounter(member.getHeartbeatCounter());
+					matchedMember.ResetLocalTime(GetMyLocalTime());
 				}
 			}
 			else
 			{
+				//Unseen member
 				String IP = member.getIP();
 				int heartbeatCounter = member.getHeartbeatCounter();
 				long localTime = GetMyLocalTime(); //Our machine localTime

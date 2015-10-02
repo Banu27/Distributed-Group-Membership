@@ -17,7 +17,7 @@ public class MembershipListStruct {
 		m_bSuspect = false;
 	}
 	
-	public void ResetLocalTime(int localTime)
+	public void ResetLocalTime(long localTime)
 	{
 		m_nLocalTime = localTime;
 	}
