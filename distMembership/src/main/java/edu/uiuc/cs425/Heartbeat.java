@@ -11,11 +11,13 @@ public class Heartbeat implements Runnable {
 	private	int						m_nGossipNodes;
 	private int 					m_nGossipInterval;
 	private int 					m_nHBSendPort;
+	private int 					m_nHBCount;
 	
 	public int Initialize(Membership oMem, ConfigAccessor oConfig)
 	{
 		m_oMship = oMem;
 		m_oConfig = oConfig;
+		m_nHBCount = 0;
 		m_nGossipNodes			= oConfig.GossipNodes();
 		m_nGossipInterval		= oConfig.HeartBeatInterval();
 		m_nHBSendPort			= oConfig.HeartBeatPort();
@@ -45,10 +47,11 @@ public class Heartbeat implements Runnable {
 			if(size < m_nGossipNodes) currGossip = size;
 					
 			Set<Integer> rands = Commons.RandomK(currGossip,size);
-			
+			// hack. always ask for k+ 1 and remove self or someother node
+			System.out.println("Heartbeat count: " + String.valueOf(++m_nHBCount));
 			for (Integer i : rands)
 			{
-				String ip = m_oMship.GetIP(i);
+				String ip = m_oMship.GetIP(vSerialNumbers.get(i));
 				HeartBeatProxy proxy = new HeartBeatProxy();
 				proxy.Initialize(ip,m_nHBSendPort);
 				try {

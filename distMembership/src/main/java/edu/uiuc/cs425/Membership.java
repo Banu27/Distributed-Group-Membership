@@ -17,6 +17,8 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.io.ByteArrayOutputStream;
 
 import edu.uiuc.cs425.MembershipList.Member;
@@ -33,9 +35,16 @@ public class Membership implements Runnable{
 	
 	public void Initialize()
 	{
-		m_oHmap = new HashMap<Integer, MembershipListStruct>();
-		m_nMyHeartBeat = 1;
-		DetectFailure();
+		m_oHmap 		= new HashMap<Integer, MembershipListStruct>();
+		m_nMyHeartBeat  = 1;
+		try {
+			m_nIP  = InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+					
+		//DetectFailure();
 	}
 	
 	public void AddSelf(int serialNumber)
@@ -126,11 +135,12 @@ public class Membership implements Runnable{
 		return MemberList.parseFrom(buffer);   //Need to make sure the message is the currect return type
 	 }
 	
-	public void DetectFailure() // will be called from thread as of now.
+	// The failure detection thread is called from the controller
+	/*public void DetectFailure() // will be called from thread as of now.
 	{
 		m_oSuspectedNodeThread = new Thread(this);
     	m_oSuspectedNodeThread.start();
-	}
+	}*/
 	
 	public String GetIP(int serialNumber)
 	{
