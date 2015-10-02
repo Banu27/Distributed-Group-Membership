@@ -100,7 +100,7 @@ public class Membership implements Runnable{
 				MembershipListStruct matchedMember = m_oHmap.get(member.getSerialNumber());
 				if(member.getHeartbeatCounter() == matchedMember.GetHeartbeatCounter())
 				{
-					if(member.GetSerialNumber() == matchedMember.GetSerialNumber()
+					if(member.getSerialNumber() == matchedMember.GetSerialNumber())
 							matchedMember.ResetLocalTime(GetMyLocalTime());
 				}
 				else
@@ -112,6 +112,7 @@ public class Membership implements Runnable{
 			else
 			{
 				//Unseen member
+				System.out.println("Adding node to memberlist " + member.getIP() );
 				String IP = member.getIP();
 				int heartbeatCounter = member.getHeartbeatCounter();
 				long localTime = GetMyLocalTime(); //Our machine localTime
@@ -119,8 +120,19 @@ public class Membership implements Runnable{
 				AddMemberToStruct(IP, heartbeatCounter, localTime, serialNumber);
 			}
 		}
-			
+		PrintList();
 		return Commons.SUCCESS;
+	}
+	
+	public void PrintList() // only reading the list
+	{
+		ArrayList<Integer> vMembers = GetMemberIds();
+		System.out.println("=============================");
+		for(int i=0; i<vMembers.size(); ++i)
+		{
+			m_oHmap.get(vMembers.get(i)).Print();
+		}
+		System.out.println("=============================");
 	}
 
 	public long GetMyLocalTime()

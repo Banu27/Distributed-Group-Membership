@@ -17,6 +17,12 @@ public class MembershipListStruct {
 		m_bSuspect = false;
 	}
 	
+	public void Print()
+	{
+		System.out.println(m_nIP + " " + String.valueOf(m_nHeatbeatCounter) + " " +String.valueOf(m_nLocalTime)
+					+ " " + String.valueOf(m_nSerialNumber) + " " + String.valueOf(m_bSuspect));
+	}
+	
 	public void ResetLocalTime(long localTime)
 	{
 		m_nLocalTime = localTime;
