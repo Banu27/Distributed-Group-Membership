@@ -226,6 +226,7 @@ public class Membership implements Runnable{
 	
 	public void run()
 	{
+		Thread.sleep(3000);
 		while(true) {
 			
 			long start_time = System.nanoTime();
@@ -246,7 +247,7 @@ public class Membership implements Runnable{
 					{	 
 						m_oLockW.lock();
 						m_oLogger.Info(new String("Removing node : " + memberStruct.GetIP())); //UniqueId instead?
-						m_oHmap.remove(mentry.getKey());
+						iterator.remove();
 						m_oLockW.unlock();
 					}
 					else
