@@ -225,22 +225,21 @@ public class Membership implements Runnable{
 		while(true) {
 			
 			long start_time = System.nanoTime();
-			Set<Entry<String, MembershipListStruct>> set = m_oHmap.entrySet();
-			Iterator<Entry<String, MembershipListStruct>> iterator = set.iterator();
+			ArrayList<String> vMembers = GetMemberIds();
 			
-			//No need for write lock. No other thread or function can set suspect. 
-			//Read lock imposed due to local time read
-			m_oLockR.lock();
-			while(iterator.hasNext()) {
-				Map.Entry mentry = (Map.Entry)iterator.next();
-				MembershipListStruct memberStruct = m_oHmap.get(mentry.getKey());
+			//write lock since the members could be removed or set as suspect
+			m_oLockW.lock();
+			for(int i=0; i<vMembers.size(); ++i)
+			{
+				
+				MembershipListStruct memberStruct = m_oHmap.get(vMembers.get(i));
 				if(!memberStruct.GetUniqueId().equals(m_sUniqueId))
 				{
 					if((memberStruct.IsSuspect() || memberStruct.HasLeft()) 
 							&& ((GetMyLocalTime() - memberStruct.GetLocalTime()) > 2*m_nTfail))
-					{
+					{	
 						m_oLogger.Info(new String("Removing node : " + memberStruct.GetIP())); //UniqueId instead?
-						m_oHmap.remove(mentry.getKey());
+						m_oHmap.remove(vMembers.get(i));
 					}
 					else
 					{
@@ -252,7 +251,7 @@ public class Membership implements Runnable{
 					}
 				}
 			}
-			m_oLockR.unlock();
+			m_oLockW.unlock();
 			long diff = (System.nanoTime() - start_time)/1000000;
 			try {
 				Thread.sleep(m_nTfail - diff);
