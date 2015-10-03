@@ -226,7 +226,12 @@ public class Membership implements Runnable{
 	
 	public void run()
 	{
-		Thread.sleep(3000);
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			m_oLogger.Error(m_oLogger.StackTraceToString(e1));
+		}
 		while(true) {
 			
 			long start_time = System.nanoTime();
