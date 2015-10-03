@@ -105,7 +105,9 @@ public class Controller {
 		return Commons.SUCCESS;
 	}
 	
-	public int StartAllServices()
+
+	
+	public void StartAllServices()
 	{
 		if( m_sNodeType.equals(Commons.NODE_INTROCUDER))
 		{
@@ -113,16 +115,22 @@ public class Controller {
 		}
 		// bring up the heartbeat receiver
 		m_oCommServ.StartHeartBeatRecvr();
-		
+	}
+	
+	public void StartHB()
+	{
 		// start heart beating thread
 		m_HBThread = new Thread(m_oHeartbeat);
 		m_HBThread.start();
-		
+				
+				
+	}
+	
+	public void StartFailureDetection()
+	{
 		//start failure detection thread
 		m_FailDetThread = new Thread(m_oMember);
 		m_FailDetThread.start();
-		
-		return Commons.SUCCESS;
 	}
 	
 	
