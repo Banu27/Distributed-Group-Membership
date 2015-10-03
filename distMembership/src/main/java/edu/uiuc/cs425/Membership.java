@@ -234,7 +234,7 @@ public class Membership implements Runnable{
 			while(iterator.hasNext()) {
 				Map.Entry mentry = (Map.Entry)iterator.next();
 				MembershipListStruct memberStruct = m_oHmap.get(mentry.getKey());
-				if(!memberStruct.GetUniqueId().equals(m_sUniqueId));
+				if(!memberStruct.GetUniqueId().equals(m_sUniqueId))
 				{
 					if((memberStruct.IsSuspect() || memberStruct.HasLeft()) 
 							&& ((GetMyLocalTime() - memberStruct.GetLocalTime()) > 2*m_nTfail))
