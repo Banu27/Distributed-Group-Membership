@@ -20,8 +20,8 @@ public class MembershipListStruct {
 	
 	public void Print()
 	{
-		System.out.println(m_sUniqueId + " |" + String.valueOf(m_nHeatbeatCounter) + " |" +String.valueOf(m_nLocalTime)
-					+ " |" + String.valueOf(m_eState));
+		System.out.println(m_sUniqueId + " | " + String.valueOf(m_nHeatbeatCounter) + " | " +String.valueOf(m_nLocalTime)
+					+ " | " + String.valueOf(m_eState));
 	}
 	
 	public String GetStr()

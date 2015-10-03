@@ -72,7 +72,7 @@ public class Membership implements Runnable{
 	{
 		//Write lock. Add self called from controller
 		//m_nSerialNumber = serialNumber;
-		m_sUniqueId = new String(m_sIP + String.valueOf(GetMyLocalTime()));
+		m_sUniqueId = new String(m_sIP + ":" + String.valueOf(GetMyLocalTime()));
 		m_oLockW.lock();
 		AddMemberToStruct( m_sUniqueId, m_sIP, m_nMyHeartBeat, GetMyLocalTime());
 		m_oLockW.unlock();
@@ -197,7 +197,7 @@ public class Membership implements Runnable{
 		}
 		m_oLockR.unlock();
 		msg.append("===========ENDLIST============");
-		m_oLogger.Info(msg.toString());
+		m_oLogger.Debug(msg.toString());
 	}
 	
 	public long GetMyLocalTime()
@@ -237,14 +237,14 @@ public class Membership implements Runnable{
 				if(!memberStruct.GetUniqueId().equals(m_sUniqueId));
 				{
 					if((memberStruct.IsSuspect() || memberStruct.HasLeft()) 
-							&& (memberStruct.GetLocalTime() - GetMyLocalTime() > 2*m_nTfail))
+							&& ((GetMyLocalTime() - memberStruct.GetLocalTime()) > 2*m_nTfail))
 					{
 						m_oLogger.Info(new String("Removing node : " + memberStruct.GetIP())); //UniqueId instead?
 						m_oHmap.remove(mentry.getKey());
 					}
 					else
 					{
-						if(memberStruct.GetLocalTime() - GetMyLocalTime() > m_nTfail)
+						if((GetMyLocalTime() - memberStruct.GetLocalTime()) > m_nTfail)
 						{
 							m_oLogger.Info(new String("Suspected node : " + memberStruct.GetIP()));
 							memberStruct.setAsSuspect();
