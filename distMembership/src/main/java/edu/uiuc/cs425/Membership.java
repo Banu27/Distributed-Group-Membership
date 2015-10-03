@@ -84,7 +84,7 @@ public class Membership implements Runnable{
 		//No write lock. Write lock present in Merge.
 		MembershipListStruct newMember = new MembershipListStruct(IP, uniqueId, heartbeatCounter, localTime);
 		m_oHmap.put(uniqueId,newMember);
-		m_oLogger.Info(new String("Added new member to current memberlist : " + uniqueId));
+		m_oLogger.Info(new String("IMPORTANT : Added new member to current memberlist : " + uniqueId));
 	}
 	
 	public void IncrementHeartbeat()
@@ -146,6 +146,7 @@ public class Membership implements Runnable{
 				if(member.getHasLeft())
 				{
 					matchedMember.setAsLeft();
+					m_oLogger.Info(new String("IMPORTANT : " + matchedMember.GetUniqueId() + " has left"));
 					matchedMember.ResetLocalTime(GetMyLocalTime());
 				}
 				if(!matchedMember.HasLeft() 
@@ -154,7 +155,10 @@ public class Membership implements Runnable{
 					matchedMember.ResetHeartbeatCounter(member.getHeartbeatCounter());
 					matchedMember.ResetLocalTime(GetMyLocalTime());
 					if(matchedMember.IsSuspect())
+					{
+						m_oLogger.Info(new String("IMPORTANT : Setting suspected node as Alive : " + matchedMember.GetUniqueId()));
 						matchedMember.setAsAlive();
+					}
 				}
 			}
 			else
@@ -239,11 +243,10 @@ public class Membership implements Runnable{
 			long start_time = System.nanoTime();
 			Set<Entry<String, MembershipListStruct>> set = m_oHmap.entrySet();
 		    Iterator<Entry<String, MembershipListStruct>> iterator = set.iterator();
-		    
-		   
+
 		    while(iterator.hasNext()) {
 		    
-			//write lock since the members could be removed or set as suspect
+		    	//write lock since the members could be removed or set as suspect
 		    	Map.Entry mentry = (Map.Entry)iterator.next();
 		        MembershipListStruct memberStruct = (MembershipListStruct) mentry.getValue(); //m_oHmap.get(mentry.getKey());
 		        
@@ -253,7 +256,7 @@ public class Membership implements Runnable{
 							&& ((GetMyLocalTime() - memberStruct.GetLocalTime()) > 2*m_nTfail))
 					{	 
 						m_oLockW.lock();
-						m_oLogger.Info(new String("Removing node : " + memberStruct.GetIP())); //UniqueId instead?
+						m_oLogger.Info(new String("IMPORTANT : Removing node : " + memberStruct.GetIP())); //UniqueId instead?
 						iterator.remove();
 						m_oLockW.unlock();
 					}
@@ -261,7 +264,7 @@ public class Membership implements Runnable{
 					{
 						if((GetMyLocalTime() - memberStruct.GetLocalTime()) > m_nTfail)
 						{
-							m_oLogger.Info(new String("Suspected node : " + memberStruct.GetIP()));
+							m_oLogger.Info(new String("IMPORTANT : Suspected node : " + memberStruct.GetIP()));
 							memberStruct.setAsSuspect();
 						}
 					}
@@ -283,7 +286,7 @@ public class Membership implements Runnable{
 	public int TimeToLeave()
 	{
 		m_oHmap.get(m_sUniqueId).setAsLeft();
-		m_oLogger.Info(new String("Setting node as LEFT : " + m_sIP));
+		m_oLogger.Info(new String("IMPORTANT : Setting node as LEFT : " + m_sIP));
 		return Commons.SUCCESS;
 	}
 	

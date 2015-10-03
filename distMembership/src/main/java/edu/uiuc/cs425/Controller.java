@@ -38,8 +38,6 @@ public class Controller {
 	public int Initialize(String sXML)
 	{
 		
-		
-		
 		if( Commons.FAILURE == m_oConfig.Initialize(sXML))
 		{
 			System.out.println("Failed to Initialize XML");
