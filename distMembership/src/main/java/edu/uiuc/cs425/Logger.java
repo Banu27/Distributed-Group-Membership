@@ -42,6 +42,7 @@ public class Logger {
 		String concatStr = timeStamp + " INFO " + str;
 		m_oLock.lock();
 		m_oWriter.println(concatStr);
+		m_oWriter.flush();
 		m_oLock.unlock();
 	}
 	
@@ -60,6 +61,7 @@ public class Logger {
 		String concatStr = timeStamp + " WARNING " + str;
 		m_oLock.lock();
 		m_oWriter.println(concatStr);
+		m_oWriter.flush();
 		m_oLock.unlock();
 	}
 	
@@ -69,6 +71,7 @@ public class Logger {
 		String concatStr = timeStamp + " ERROR " + str;
 		m_oLock.lock();
 		m_oWriter.println(concatStr);
+		m_oWriter.flush();
 		m_oLock.unlock();
 	}
 
