@@ -2,11 +2,12 @@ package edu.uiuc.cs425;
 
 public class MembershipListStruct {
 
-	String 			m_sUniqueId;
-	String 			m_sIP;
-	int 			m_nHeatbeatCounter;
-	long 			m_nLocalTime;
-	STATE 			m_eState;
+	private enum 			m_enumState { ALIVE, SUSPECT, LEFT };
+	private String 			m_sUniqueId;
+	private String 			m_sIP;
+	private int 			m_nHeatbeatCounter;
+	private long 			m_nLocalTime;
+	private m_enumState 	m_eState;
 	
 	public MembershipListStruct(String IP, String uniqueId, int heartbeatCounter, long localTime)
 	{
@@ -14,7 +15,7 @@ public class MembershipListStruct {
 		m_sIP = IP;
 		m_nHeatbeatCounter = heartbeatCounter;
 		m_nLocalTime = localTime;
-		m_eState = STATE.ALIVE;
+		m_eState = m_enumState.ALIVE;
 	}
 	
 	public void Print()
@@ -50,12 +51,12 @@ public class MembershipListStruct {
 	
 	public boolean IsSuspect()
 	{
-		return (m_eState == STATE.SUSPECT);
+		return (m_eState == m_enumState.SUSPECT);
 	}
 		
 	public void setAsSuspect()
 	{
-		m_eState = STATE.SUSPECT;
+		m_eState = m_enumState.SUSPECT;
 	}
 	
 	public String GetIP()
@@ -64,11 +65,11 @@ public class MembershipListStruct {
 	}
 	public boolean HasLeft()
 	{
-		return (m_eState == STATE.LEFT);
+		return (m_eState == m_enumState.LEFT);
 	}
 	
 	public void setAsLeft()
 	{
-		m_eState = STATE.LEFT;
+		m_eState = m_enumState.LEFT;
 	}
 }
