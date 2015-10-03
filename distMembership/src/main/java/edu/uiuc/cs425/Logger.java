@@ -2,6 +2,7 @@ package edu.uiuc.cs425;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -70,6 +71,13 @@ public class Logger {
 		m_oWriter.println(concatStr);
 		m_oLock.unlock();
 	}
+
+	public String StackTraceToString(Exception ex)
+	{	StringWriter errors = new StringWriter();
+		ex.printStackTrace(new PrintWriter(errors));
+		return errors.toString();
+	}
+
 	
 	public void Close()
 	{

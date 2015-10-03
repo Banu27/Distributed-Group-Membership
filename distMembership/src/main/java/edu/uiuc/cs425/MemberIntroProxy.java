@@ -15,6 +15,7 @@ public class MemberIntroProxy implements Iface {
 	
 	private MemberIntroducer.Client m_oClient;
 	private TTransport transport;
+	private Logger m_oLogger;
 	
 	public MemberIntroProxy()
 	{
@@ -28,21 +29,24 @@ public class MemberIntroProxy implements Iface {
 			transport.open();
 		} catch (TTransportException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println("Failed to initialize MemberIntro proxy");
+			m_oLogger.Error(m_oLogger.StackTraceToString(e));
+			m_oLogger.Error(new String("Failed to initialize MemberIntro proxy")); //IP????
 			return Commons.FAILURE;
 		}
 	    m_oClient = new MemberIntroducer.Client(new TBinaryProtocol(transport));
+	    m_oLogger.Info(new String("Created Member Proxy"));
 		return Commons.SUCCESS;
 	}
 
 	public int JoinGroup() throws TException {
 		// TODO Auto-generated method stub
+		m_oLogger.Info(new String("Joining Group"));
 		return m_oClient.JoinGroup();
 	}
 
 	public ByteBuffer GetMembershipList() throws TException {
 		// TODO Auto-generated method stub
+		m_oLogger.Info(new String("Receiving MembershipList"));
 		return m_oClient.GetMembershipList();
 	}
 

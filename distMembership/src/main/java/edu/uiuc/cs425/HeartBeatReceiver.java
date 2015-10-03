@@ -10,6 +10,7 @@ public class HeartBeatReceiver {
 	private DatagramSocket  m_socket;
 	private DatagramPacket  m_packet;
 	private Membership		m_oMembership;
+	private Logger 			m_oLogger;
 	
 	public HeartBeatReceiver() {
 		m_msgBuffer = new byte[2048];
@@ -29,9 +30,9 @@ public class HeartBeatReceiver {
         }
         catch (Exception e)
         {
-                e.printStackTrace();
-                System.out.println("Error while initializing HB server");
-                return Commons.FAILURE;
+            m_oLogger.Error(m_oLogger.StackTraceToString(e));    
+        	m_oLogger.Error(new String("Error while initializing HB server"));
+            return Commons.FAILURE;
         }
 		return Commons.SUCCESS;
 	}
@@ -51,14 +52,14 @@ public class HeartBeatReceiver {
 				m_socket.receive(m_packet);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				m_oLogger.Error(m_oLogger.StackTraceToString(e));
 			}
 			 byte[] memberShipBlob = Arrays.copyOf(m_msgBuffer, m_packet.getLength());
 			 try {
 				m_oMembership.MergeList(memberShipBlob);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				m_oLogger.Error(m_oLogger.StackTraceToString(e));
 				return;
 			}
              m_packet.setLength(m_msgBuffer.length);

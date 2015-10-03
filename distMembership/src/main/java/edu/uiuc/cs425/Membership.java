@@ -19,6 +19,8 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.io.ByteArrayOutputStream;
@@ -36,13 +38,14 @@ public class Membership implements Runnable{
 	private ReentrantReadWriteLock 						m_oReadWriteLock; 
 	private Lock 										m_oLockR; 
 	private Lock 										m_oLockW; 
+	private Logger										m_oLogger;
 	
 	public String UniqueId()
 	{
 		return m_sUniqueId;
 	}
 	
-	public int Initialize(int tFail)
+	public int Initialize(int tFail, Logger logger)
 	{
 		m_oHmap 		= new HashMap<String, MembershipListStruct>();
 		m_nMyHeartBeat  = 0;
@@ -50,25 +53,30 @@ public class Membership implements Runnable{
 		m_oLockR = m_oReadWriteLock.readLock();
 		m_oLockW = m_oReadWriteLock.writeLock();
 		m_nTfail = tFail;
+		m_oLogger = logger;
 		
 		try {
 			m_sIP  = InetAddress.getLocalHost().getHostAddress();
 		} catch (UnknownHostException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			m_oLogger.Error(m_oLogger.StackTraceToString(e1));
 			return Commons.FAILURE;
 		}
+		
+		m_oLogger.Info(new String("Started Membership class"));
+		
 		return Commons.SUCCESS;
 	}
-	
+		
 	public void AddSelf()
 	{
 		//Write lock. Add self called from controller
 		//m_nSerialNumber = serialNumber;
-		m_sUniqueId = m_sIP + String.valueOf(GetMyLocalTime());
+		m_sUniqueId = new String(m_sIP + String.valueOf(GetMyLocalTime()));
 		m_oLockW.lock();
 		AddMemberToStruct( m_sUniqueId, m_sIP, m_nMyHeartBeat, GetMyLocalTime());
 		m_oLockW.unlock();
+		m_oLogger.Info(new String("Added self node with id : " + m_sUniqueId));
 	}
 	
 	public void AddMemberToStruct(String uniqueId, String IP, int heartbeatCounter, long localTime)
@@ -76,6 +84,7 @@ public class Membership implements Runnable{
 		//No write lock. Write lock present in Merge.
 		MembershipListStruct newMember = new MembershipListStruct(uniqueId, IP, heartbeatCounter, localTime);
 		m_oHmap.put(uniqueId,newMember);
+		m_oLogger.Info(new String("Added new member to current memberlist : " + uniqueId));
 	}
 	
 	public void IncrementHeartbeat()
@@ -107,6 +116,7 @@ public class Membership implements Runnable{
 	    }	      
 		memberListBuilder.addAllMember(memberList);
 		m_oLockR.unlock();
+		//LOG????
 		return memberListBuilder.build();
 		
 	}
@@ -120,6 +130,7 @@ public class Membership implements Runnable{
 	{
 		MemberList incomingList = ObjectFromByteBuffer(incomingListBuffer);
 		
+		m_oLogger.Info(new String("Merging list")); //Needed?
 		//Write lock 
 		m_oLockW.lock();
 		for(Member member : incomingList.getMemberList())
@@ -155,12 +166,13 @@ public class Membership implements Runnable{
 			}
 		}
 		m_oLockW.unlock();
-		PrintList();
+		PrintList(); //NEEDED?? IN LOGGER???
 		return Commons.SUCCESS;
 	}
 	
 	public void PrintList() // only reading the list
 	{
+		m_oLockR.lock();
 		ArrayList<String> vMembers = GetMemberIds();
 		System.out.println("=============================");
 		for(int i=0; i<vMembers.size(); ++i)
@@ -168,6 +180,7 @@ public class Membership implements Runnable{
 			if(!m_oHmap.get(vMembers.get(i)).HasLeft())
 				m_oHmap.get(vMembers.get(i)).Print();
 		}
+		m_oLockR.unlock();
 		System.out.println("=============================");
 	}
 
@@ -193,12 +206,12 @@ public class Membership implements Runnable{
 	
 	public void run()
 	{
-		//Sleep time modify
 		while(true) {
 			
 			long start_time = System.nanoTime();
 			Set<Entry<String, MembershipListStruct>> set = m_oHmap.entrySet();
 			Iterator<Entry<String, MembershipListStruct>> iterator = set.iterator();
+			
 			//No need for write lock. No other thread or function can set suspect. 
 			//Read lock imposed due to local time read
 			m_oLockR.lock();
@@ -210,12 +223,14 @@ public class Membership implements Runnable{
 					if((memberStruct.IsSuspect() || memberStruct.HasLeft()) 
 							&& (memberStruct.GetLocalTime() - GetMyLocalTime() > 2*m_nTfail))
 					{
+						m_oLogger.Info(new String("Removing node : " + memberStruct.GetIP())); //UniqueId instead?
 						m_oHmap.remove(mentry.getKey());
 					}
 					else
 					{
 						if(memberStruct.GetLocalTime() - GetMyLocalTime() > m_nTfail)
 						{
+							m_oLogger.Info(new String("Suspected node : " + memberStruct.GetIP()));
 							memberStruct.setAsSuspect();
 						}
 					}
@@ -227,7 +242,7 @@ public class Membership implements Runnable{
 				Thread.sleep(m_nTfail - diff);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				m_oLogger.Error(m_oLogger.StackTraceToString(e));
 				return;
 			}
 			
@@ -237,6 +252,7 @@ public class Membership implements Runnable{
 	public int TimeToLeave()
 	{
 		m_oHmap.get(m_sUniqueId).setAsLeft();
+		m_oLogger.Info(new String("Setting node as LEFT : " + m_sIP));
 		return Commons.SUCCESS;
 	}
 	
