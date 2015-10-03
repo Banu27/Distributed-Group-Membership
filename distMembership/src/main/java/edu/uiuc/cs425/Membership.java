@@ -89,9 +89,13 @@ public class Membership implements Runnable{
 	
 	public void IncrementHeartbeat()
 	{
-		m_nMyHeartBeat = m_nMyHeartBeat + 1;
-		m_oHmap.get(m_sUniqueId).ResetHeartbeatCounter(m_nMyHeartBeat);
-		m_oHmap.get(m_sUniqueId).ResetLocalTime(GetMyLocalTime());
+		if(m_oHmap.containsKey(m_sUniqueId))
+		{
+			m_nMyHeartBeat = m_nMyHeartBeat + 1;
+			m_oHmap.get(m_sUniqueId).ResetHeartbeatCounter(m_nMyHeartBeat);
+			m_oHmap.get(m_sUniqueId).ResetLocalTime(GetMyLocalTime());
+	
+		}
 	}
 	
 	
@@ -105,7 +109,7 @@ public class Membership implements Runnable{
 	    Iterator<Entry<String, MembershipListStruct>> iterator = set.iterator();
 	    while(iterator.hasNext()) {
 	         Map.Entry mentry = (Map.Entry)iterator.next();
-	         MembershipListStruct memberStruct = m_oHmap.get(mentry.getKey());
+	         MembershipListStruct memberStruct = (MembershipListStruct) mentry.getValue(); //m_oHmap.get(mentry.getKey());
 	         Member.Builder member = Member.newBuilder();
 	         member.setHeartbeatCounter(memberStruct.GetHeartbeatCounter());
 	         member.setIP(memberStruct.GetIP());
@@ -225,21 +229,25 @@ public class Membership implements Runnable{
 		while(true) {
 			
 			long start_time = System.nanoTime();
-			ArrayList<String> vMembers = GetMemberIds();
-			
+			Set<Entry<String, MembershipListStruct>> set = m_oHmap.entrySet();
+		    Iterator<Entry<String, MembershipListStruct>> iterator = set.iterator();
+		    
+		   
+		    while(iterator.hasNext()) {
+		    
 			//write lock since the members could be removed or set as suspect
-			m_oLockW.lock();
-			for(int i=0; i<vMembers.size(); ++i)
-			{
-				
-				MembershipListStruct memberStruct = m_oHmap.get(vMembers.get(i));
-				if(!memberStruct.GetUniqueId().equals(m_sUniqueId))
+		    	Map.Entry mentry = (Map.Entry)iterator.next();
+		        MembershipListStruct memberStruct = (MembershipListStruct) mentry.getValue(); //m_oHmap.get(mentry.getKey());
+		        
+		        if(!memberStruct.GetUniqueId().equals(m_sUniqueId))
 				{
 					if((memberStruct.IsSuspect() || memberStruct.HasLeft()) 
 							&& ((GetMyLocalTime() - memberStruct.GetLocalTime()) > 2*m_nTfail))
-					{	
+					{	 
+						m_oLockW.lock();
 						m_oLogger.Info(new String("Removing node : " + memberStruct.GetIP())); //UniqueId instead?
-						m_oHmap.remove(vMembers.get(i));
+						m_oHmap.remove(mentry.getKey());
+						m_oLockW.unlock();
 					}
 					else
 					{
@@ -251,7 +259,7 @@ public class Membership implements Runnable{
 					}
 				}
 			}
-			m_oLockW.unlock();
+			//m_oLockW.unlock();
 			long diff = (System.nanoTime() - start_time)/1000000;
 			try {
 				Thread.sleep(m_nTfail - diff);
