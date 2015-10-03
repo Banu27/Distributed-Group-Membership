@@ -37,14 +37,19 @@ public class Membership implements Runnable{
 	private Lock 										m_oLockR; 
 	private Lock 										m_oLockW; 
 	
+	public String UniqueId()
+	{
+		return m_sUniqueId;
+	}
 	
-	public int Initialize()
+	public int Initialize(int tFail)
 	{
 		m_oHmap 		= new HashMap<String, MembershipListStruct>();
 		m_nMyHeartBeat  = 0;
 		m_oReadWriteLock = new ReentrantReadWriteLock();
 		m_oLockR = m_oReadWriteLock.readLock();
 		m_oLockW = m_oReadWriteLock.writeLock();
+		m_nTfail = tFail;
 		
 		try {
 			m_sIP  = InetAddress.getLocalHost().getHostAddress();
@@ -128,13 +133,11 @@ public class Membership implements Runnable{
 					matchedMember.setAsLeft();
 					matchedMember.ResetLocalTime(GetMyLocalTime());
 				}
-				if(!matchedMember.HasLeft())
+				if(!matchedMember.HasLeft() 
+						&& member.getHeartbeatCounter() > matchedMember.GetHeartbeatCounter())
 				{
-					if(member.getHeartbeatCounter() > matchedMember.GetHeartbeatCounter())
-					{
-						matchedMember.ResetHeartbeatCounter(member.getHeartbeatCounter());
-						matchedMember.ResetLocalTime(GetMyLocalTime());
-					}
+					matchedMember.ResetHeartbeatCounter(member.getHeartbeatCounter());
+					matchedMember.ResetLocalTime(GetMyLocalTime());
 				}
 			}
 			else
@@ -192,14 +195,8 @@ public class Membership implements Runnable{
 	{
 		//Sleep time modify
 		while(true) {
-			try {
-				Thread.sleep(2000); //FIX NUMBER
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				
-				e.printStackTrace();
-			}
 			
+			long start_time = System.nanoTime();
 			Set<Entry<String, MembershipListStruct>> set = m_oHmap.entrySet();
 			Iterator<Entry<String, MembershipListStruct>> iterator = set.iterator();
 			//No need for write lock. No other thread or function can set suspect. 
@@ -210,12 +207,10 @@ public class Membership implements Runnable{
 				MembershipListStruct memberStruct = m_oHmap.get(mentry.getKey());
 				if(!memberStruct.GetUniqueId().equals(m_sUniqueId));
 				{
-					if(memberStruct.IsSuspect() || memberStruct.HasLeft())
+					if((memberStruct.IsSuspect() || memberStruct.HasLeft()) 
+							&& (memberStruct.GetLocalTime() - GetMyLocalTime() > 2*m_nTfail))
 					{
-						if(memberStruct.GetLocalTime() - GetMyLocalTime() > 2*m_nTfail)
-						{
-							m_oHmap.remove(mentry.getKey());
-						}
+						m_oHmap.remove(mentry.getKey());
 					}
 					else
 					{
@@ -227,6 +222,15 @@ public class Membership implements Runnable{
 				}
 			}
 			m_oLockR.unlock();
+			long diff = (System.nanoTime() - start_time)/1000000;
+			try {
+				Thread.sleep(m_nTfail - diff);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			}
+			
 		}
 	}
 

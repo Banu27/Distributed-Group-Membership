@@ -55,7 +55,7 @@ public class Controller {
 		
 		System.out.println("Nodetype: " + m_sNodeType);
 		
-		m_oMember.Initialize();
+		m_oMember.Initialize(m_oConfig.FailureInterval());
 		
 		if(m_sNodeType.equals(Commons.NODE_INTROCUDER))
 		{
