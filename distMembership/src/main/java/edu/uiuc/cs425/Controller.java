@@ -151,6 +151,7 @@ public class Controller {
 			// TODO Auto-generated catch block
 			m_oLogger.Error(m_oLogger.StackTraceToString(e));
 		}
+		System.exit(0);
 	}
 	
 	

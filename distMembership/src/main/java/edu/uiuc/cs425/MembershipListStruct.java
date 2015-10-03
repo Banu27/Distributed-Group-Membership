@@ -79,4 +79,9 @@ public class MembershipListStruct {
 	{
 		m_eState = m_enumState.LEFT;
 	}
+	
+	public void setAsAlive()
+	{
+		m_eState = m_enumState.ALIVE;
+	}
 }

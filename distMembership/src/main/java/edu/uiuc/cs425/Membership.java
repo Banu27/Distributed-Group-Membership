@@ -153,6 +153,8 @@ public class Membership implements Runnable{
 				{
 					matchedMember.ResetHeartbeatCounter(member.getHeartbeatCounter());
 					matchedMember.ResetLocalTime(GetMyLocalTime());
+					if(matchedMember.IsSuspect())
+						matchedMember.setAsAlive();
 				}
 			}
 			else
