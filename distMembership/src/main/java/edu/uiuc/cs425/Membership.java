@@ -28,53 +28,58 @@ import edu.uiuc.cs425.MembershipList.MemberList;
 
 public class Membership implements Runnable{
 	
-	private HashMap<Integer,MembershipListStruct> 		m_oHmap;
+	private HashMap<String,MembershipListStruct> 		m_oHmap;
 	private long  										m_nTfail;
-	private Thread	 									m_oSuspectedNodeThread;
-	private int 										m_nSerialNumber;
-	private String 										m_nIP;
+	private String 										m_sIP;
+	private String 										m_sUniqueId;
 	private int 										m_nMyHeartBeat;
-	private ReentrantReadWriteLock 				m_oReadWriteLock; 
-	private Lock 									m_oLockR; 
-	private Lock 									m_oLockW; 
+	private ReentrantReadWriteLock 						m_oReadWriteLock; 
+	private Lock 										m_oLockR; 
+	private Lock 										m_oLockW; 
 	
 	
-	public void Initialize()
+	public int Initialize()
 	{
-		m_oHmap 		= new HashMap<Integer, MembershipListStruct>();
-		m_nMyHeartBeat  = 1;
+		m_oHmap 		= new HashMap<String, MembershipListStruct>();
+		m_nMyHeartBeat  = 0;
 		m_oReadWriteLock = new ReentrantReadWriteLock();
 		m_oLockR = m_oReadWriteLock.readLock();
 		m_oLockW = m_oReadWriteLock.writeLock();
 		
 		try {
-			m_nIP  = InetAddress.getLocalHost().getHostAddress();
+			m_sIP  = InetAddress.getLocalHost().getHostAddress();
 		} catch (UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			return Commons.FAILURE;
 		}
+		return Commons.SUCCESS;
 	}
 	
-	public void AddSelf(int serialNumber)
+	public void AddSelf()
 	{
-		//Write lock. Add self called from controlller
+		//Write lock. Add self called from controller
+		//m_nSerialNumber = serialNumber;
+		m_sUniqueId = m_sIP + String.valueOf(GetMyLocalTime());
 		m_oLockW.lock();
-		m_nSerialNumber = serialNumber;
-		AddMemberToStruct(m_nIP, m_nMyHeartBeat, GetMyLocalTime(), m_nSerialNumber);
+		AddMemberToStruct( m_sUniqueId, m_sIP, m_nMyHeartBeat, GetMyLocalTime());
 		m_oLockW.unlock();
 	}
 	
-	public void AddMemberToStruct(String IP, int heartbeatCounter, long localTime, int serialNumber)
+	public void AddMemberToStruct(String uniqueId, String IP, int heartbeatCounter, long localTime)
 	{
 		//No write lock. Write lock present in Merge.
-		MembershipListStruct newMember = new MembershipListStruct(IP, heartbeatCounter, localTime, serialNumber);
-		m_oHmap.put(serialNumber,newMember);
+		MembershipListStruct newMember = new MembershipListStruct(uniqueId, IP, heartbeatCounter, localTime);
+		m_oHmap.put(uniqueId,newMember);
 	}
 	
 	public void IncrementHeartbeat()
 	{
 		m_nMyHeartBeat = m_nMyHeartBeat + 1;
+		m_oHmap.get(m_sUniqueId).ResetHeartbeatCounter(m_nMyHeartBeat);
+		m_oHmap.get(m_sUniqueId).ResetLocalTime(GetMyLocalTime());
 	}
+	
 	
 	public MemberList CreateObject()
 	{	 
@@ -82,8 +87,8 @@ public class Membership implements Runnable{
 		m_oLockR.lock();
 		MemberList.Builder memberListBuilder  = MemberList.newBuilder();
 		List<Member> memberList = new ArrayList<Member>();
-		Set<Entry<Integer, MembershipListStruct>> set = m_oHmap.entrySet();
-	    Iterator<Entry<Integer, MembershipListStruct>> iterator = set.iterator();
+		Set<Entry<String, MembershipListStruct>> set = m_oHmap.entrySet();
+	    Iterator<Entry<String, MembershipListStruct>> iterator = set.iterator();
 	    while(iterator.hasNext()) {
 	         Map.Entry mentry = (Map.Entry)iterator.next();
 	         MembershipListStruct memberStruct = m_oHmap.get(mentry.getKey());
@@ -91,7 +96,7 @@ public class Membership implements Runnable{
 	         member.setHeartbeatCounter(memberStruct.GetHeartbeatCounter());
 	         member.setIP(memberStruct.GetIP());
 	         member.setLocalTime(memberStruct.GetLocalTime());
-	         member.setSerialNumber(memberStruct.GetSerialNumber());
+	         member.setUniqueId(memberStruct.GetUniqueId());
 	         memberList.add(member.build());
 	    }	      
 		memberListBuilder.addAllMember(memberList);
@@ -113,16 +118,11 @@ public class Membership implements Runnable{
 		m_oLockW.lock();
 		for(Member member : incomingList.getMemberList())
 		{ 
-			boolean found = false;
-			if(m_oHmap.containsKey(member.getSerialNumber()))
+			if(m_oHmap.containsKey(member.getUniqueId()))
 			{
-				MembershipListStruct matchedMember = m_oHmap.get(member.getSerialNumber());
-				if(member.getHeartbeatCounter() == matchedMember.GetHeartbeatCounter())
-				{
-					if(member.getSerialNumber() == matchedMember.GetSerialNumber())
-							matchedMember.ResetLocalTime(GetMyLocalTime());
-				}
-				else
+				MembershipListStruct matchedMember = m_oHmap.get(member.getUniqueId());
+				//> Can never happen for self
+				if(member.getHeartbeatCounter() > matchedMember.GetHeartbeatCounter())
 				{
 					matchedMember.ResetHeartbeatCounter(member.getHeartbeatCounter());
 					matchedMember.ResetLocalTime(GetMyLocalTime());
@@ -135,8 +135,8 @@ public class Membership implements Runnable{
 				String IP = member.getIP();
 				int heartbeatCounter = member.getHeartbeatCounter();
 				long localTime = GetMyLocalTime(); //Our machine localTime
-				int serialNumber = member.getSerialNumber();
-				AddMemberToStruct(IP, heartbeatCounter, localTime, serialNumber);
+				String uniqueId = member.getUniqueId();
+				AddMemberToStruct(uniqueId, IP, heartbeatCounter, localTime);
 			}
 		}
 		m_oLockW.unlock();
@@ -146,7 +146,7 @@ public class Membership implements Runnable{
 	
 	public void PrintList() // only reading the list
 	{
-		ArrayList<Integer> vMembers = GetMemberIds();
+		ArrayList<String> vMembers = GetMemberIds();
 		System.out.println("=============================");
 		for(int i=0; i<vMembers.size(); ++i)
 		{
@@ -167,52 +167,49 @@ public class Membership implements Runnable{
 	
 	public MemberList ObjectFromByteBuffer(byte[] buffer) throws Exception 
 	{
-		return MemberList.parseFrom(buffer);   //Need to make sure the message is the currect return type
+		return MemberList.parseFrom(buffer);   //Need to make sure the message is the correct return type
 	 }
 	
-	// The failure detection thread is called from the controller
-	/*public void DetectFailure() // will be called from thread as of now.
+	public String GetIP(String uniqueId)
 	{
-		m_oSuspectedNodeThread = new Thread(this);
-    	m_oSuspectedNodeThread.start();
-	}*/
-	
-	public String GetIP(int serialNumber)
-	{
-		return m_oHmap.get(serialNumber).GetIP();
+		return m_oHmap.get(uniqueId).GetIP();
 	}
 	
 	public void run()
 	{
+		//Sleep time modify
 		while(true) {
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(2000); //FIX NUMBER
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				
 				e.printStackTrace();
 			}
 			
-			Set<Entry<Integer, MembershipListStruct>> set = m_oHmap.entrySet();
-			Iterator<Entry<Integer, MembershipListStruct>> iterator = set.iterator();
+			Set<Entry<String, MembershipListStruct>> set = m_oHmap.entrySet();
+			Iterator<Entry<String, MembershipListStruct>> iterator = set.iterator();
 			//No need for write lock. No other thread or function can set suspect. 
 			//Read lock imposed due to local time read
 			m_oLockR.lock();
 			while(iterator.hasNext()) {
 				Map.Entry mentry = (Map.Entry)iterator.next();
 				MembershipListStruct memberStruct = m_oHmap.get(mentry.getKey());
-				if(memberStruct.IsSuspect())
+				if(!memberStruct.GetUniqueId().equals(m_sUniqueId));
 				{
-					if(memberStruct.GetLocalTime() - GetMyLocalTime() > 2*m_nTfail)
+					if(memberStruct.IsSuspect())
 					{
-						m_oHmap.remove(mentry.getKey());
+						if(memberStruct.GetLocalTime() - GetMyLocalTime() > 2*m_nTfail)
+						{
+							m_oHmap.remove(mentry.getKey());
+						}
 					}
-				}
-				else
-				{
-					if(memberStruct.GetLocalTime() - GetMyLocalTime() > m_nTfail)
+					else
 					{
-						memberStruct.setAsSuspect();
+						if(memberStruct.GetLocalTime() - GetMyLocalTime() > m_nTfail)
+						{
+							memberStruct.setAsSuspect();
+						}
 					}
 				}
 			}
@@ -221,8 +218,11 @@ public class Membership implements Runnable{
 	}
 
 	//Read lock
-	 public ArrayList<Integer> GetMemberIds() 
+	 public ArrayList<String> GetMemberIds() 
 	 {
-		 return new ArrayList<Integer>(m_oHmap.keySet());
+		 m_oLockR.lock();
+		 ArrayList<String> keyList = new ArrayList<String>(m_oHmap.keySet());
+		 m_oLockR.unlock();
+		 return keyList;
 	 }
 }

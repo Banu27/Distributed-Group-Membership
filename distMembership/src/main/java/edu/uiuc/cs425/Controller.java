@@ -28,8 +28,6 @@ public class Controller {
 	
 	public int Initialize(String sXML)
 	{
-		
-		
 		if( Commons.FAILURE == m_oConfig.Initialize(sXML))
 		{
 			System.out.println("Failed to Initialize XML");
@@ -61,7 +59,10 @@ public class Controller {
 		
 		if(m_sNodeType.equals(Commons.NODE_INTROCUDER))
 		{
-			m_oIntroducer = new Introducer();
+			//Set membership obj in introducer
+			
+			m_oIntroducer = new Introducer(m_oMember);
+
 			if( Commons.FAILURE == m_oCommServ.Initialize(m_oConfig.HeartBeatPort(), 
 					m_oMember, m_oIntroducer) )
 			{
@@ -83,7 +84,6 @@ public class Controller {
 			System.out.println("Failed to initialize the heartbeat sender");
 			return Commons.FAILURE;
 		}
-		
 		return Commons.SUCCESS;
 	}
 	
@@ -100,7 +100,7 @@ public class Controller {
 		m_HBThread = new Thread(m_oHeartbeat);
 		m_HBThread.start();
 		
-		//start failure detection thred
+		//start failure detection thread
 		m_FailDetThread = new Thread(m_oMember);
 		m_FailDetThread.start();
 		
@@ -115,16 +115,17 @@ public class Controller {
 			System.out.println("Failed to initialize proxy to the introducer");
 			return Commons.FAILURE;
 		}
-		int serialNo;
+
 		try {
-			serialNo = proxy.JoinGroup();
+			int successState = proxy.JoinGroup();
 		} catch (TException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return Commons.FAILURE;
 		}
+		
 		// checkpointing will change this part of the logic
-		m_oMember.AddSelf(serialNo);
+		m_oMember.AddSelf();
 		if(m_sNodeType.equals(Commons.NODE_PARTICIPANT))
 		{
 			ByteBuffer buf;

@@ -10,8 +10,9 @@ public class HeartBeatReceiver {
 	private DatagramSocket  m_socket;
 	private DatagramPacket  m_packet;
 	private Membership		m_oMembership;
+	
 	public HeartBeatReceiver() {
-		m_msgBuffer = new byte[1024];
+		m_msgBuffer = new byte[2048];
 	}
 	
 	public int Initialize(int nPort)

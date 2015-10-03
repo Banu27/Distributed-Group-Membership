@@ -31,7 +31,7 @@ public class Heartbeat implements Runnable {
 	private void SendHBs()
 	{
 		try {
-			Thread.sleep(m_nGossipInterval);
+			Thread.sleep(m_nGossipInterval); 
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -41,8 +41,8 @@ public class Heartbeat implements Runnable {
 		{
 			long start_time = System.nanoTime();
 			m_oMship.IncrementHeartbeat();
-			ArrayList<Integer> vSerialNumbers = m_oMship.GetMemberIds();
-			int size = vSerialNumbers.size();
+			ArrayList<String> vUniqueIds = m_oMship.GetMemberIds();
+			int size = vUniqueIds.size();
 			int currGossip = m_nGossipNodes;
 			if(size < m_nGossipNodes) currGossip = size;
 					
@@ -51,7 +51,7 @@ public class Heartbeat implements Runnable {
 			System.out.println("Heartbeat count: " + String.valueOf(++m_nHBCount));
 			for (Integer i : rands)
 			{
-				String ip = m_oMship.GetIP(vSerialNumbers.get(i));
+				String ip = m_oMship.GetIP(vUniqueIds.get(i));
 				HeartBeatProxy proxy = new HeartBeatProxy();
 				proxy.Initialize(ip,m_nHBSendPort);
 				try {
@@ -66,9 +66,9 @@ public class Heartbeat implements Runnable {
 					return;
 				} 
 			}
-			double diff = (System.nanoTime() - start_time)/1e6;
+			long diff = (System.nanoTime() - start_time)/1000000;
 			try {
-				Thread.sleep(m_nGossipInterval - (long)diff);
+				Thread.sleep(m_nGossipInterval - diff);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

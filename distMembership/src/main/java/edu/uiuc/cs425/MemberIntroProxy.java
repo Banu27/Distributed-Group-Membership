@@ -32,7 +32,7 @@ public class MemberIntroProxy implements Iface {
 			System.out.println("Failed to initialize MemberIntro proxy");
 			return Commons.FAILURE;
 		}
-	    m_oClient = new MemberIntroducer.Client(new  TBinaryProtocol(transport));
+	    m_oClient = new MemberIntroducer.Client(new TBinaryProtocol(transport));
 		return Commons.SUCCESS;
 	}
 

@@ -2,25 +2,25 @@ package edu.uiuc.cs425;
 
 public class MembershipListStruct {
 
-	String 			m_nIP;
+	String 			m_sUniqueId;
+	String 			m_sIP;
 	int 			m_nHeatbeatCounter;
 	long 			m_nLocalTime;
-	int 			m_nSerialNumber;
 	boolean 		m_bSuspect;
 	
-	public MembershipListStruct(String IP, int heartbeatCounter, long localTime, int serialNumber)
+	public MembershipListStruct(String IP, String uniqueId, int heartbeatCounter, long localTime)
 	{
-		m_nIP = IP;
+		m_sUniqueId = uniqueId;
+		m_sIP = IP;
 		m_nHeatbeatCounter = heartbeatCounter;
 		m_nLocalTime = localTime;
-		m_nSerialNumber = serialNumber;
 		m_bSuspect = false;
 	}
 	
 	public void Print()
 	{
-		System.out.println(m_nIP + " " + String.valueOf(m_nHeatbeatCounter) + " " +String.valueOf(m_nLocalTime)
-					+ " " + String.valueOf(m_nSerialNumber) + " " + String.valueOf(m_bSuspect));
+		System.out.println(m_sUniqueId + " " + String.valueOf(m_nHeatbeatCounter) + " " +String.valueOf(m_nLocalTime)
+					+ " " + String.valueOf(m_bSuspect));
 	}
 	
 	public void ResetLocalTime(long localTime)
@@ -38,10 +38,11 @@ public class MembershipListStruct {
 		return m_nHeatbeatCounter;
 	}
 	
-	public int GetSerialNumber()
+	public String GetUniqueId()
 	{
-		return m_nSerialNumber;
+		return m_sUniqueId;
 	}
+	
 	public long GetLocalTime()
 	{
 		return m_nLocalTime;
@@ -59,7 +60,7 @@ public class MembershipListStruct {
 	
 	public String GetIP()
 	{
-		return m_nIP;
+		return m_sIP;
 	}
 	
 }

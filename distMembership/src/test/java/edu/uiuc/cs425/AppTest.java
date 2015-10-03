@@ -33,7 +33,7 @@ public class AppTest
      */
     public void testApp()
     {
-    	String []strArr = {"/Users/anirudhnair/code/DistGroupMembership/distMembership/config.xml"};
+    	String []strArr = {"/Users/banumuthukumar/Desktop/cs425/MP2/DistGroupMembership/distMembership/config.xml"};
     	//App.main(strArr);
         assertTrue( true );
     }
