@@ -12,6 +12,7 @@ public class Heartbeat implements Runnable {
 	private int 					m_nGossipInterval;
 	private int 					m_nHBSendPort;
 	private int 					m_nHBCount;
+	private boolean					m_bHB;
 	
 	public int Initialize(Membership oMem, ConfigAccessor oConfig)
 	{
@@ -24,8 +25,36 @@ public class Heartbeat implements Runnable {
 		System.out.println("Initialized HeartBeat: GossipNodes=" + String.valueOf(m_nGossipNodes)
 					+ " GossipInterval=" + String.valueOf(m_nGossipInterval) +
 					" m_nHBSendPort=" + String.valueOf(m_nHBSendPort));
+		m_bHB      = true;
 		
 		return Commons.SUCCESS;
+	}
+	
+	public void StopHB()
+	{
+		m_bHB = false;
+	}
+	
+	public void DoHB() throws IOException, Exception
+	{
+		ArrayList<String> vUniqueIds = m_oMship.GetMemberIds();
+		String myID = m_oMship.UniqueId();
+		vUniqueIds.remove(myID);
+		int size = vUniqueIds.size();
+		int currGossip = m_nGossipNodes;
+		if(size < m_nGossipNodes) currGossip = size;
+				
+		Set<Integer> rands = Commons.RandomK(currGossip,size);
+		// hack. always ask for k+ 1 and remove self or someother node
+		System.out.println("Heartbeat count: " + String.valueOf(++m_nHBCount));
+		for (Integer i : rands)
+		{
+			String ip = m_oMship.GetIP(vUniqueIds.get(i));
+			HeartBeatProxy proxy = new HeartBeatProxy();
+			proxy.Initialize(ip,m_nHBSendPort);
+			proxy.SendMembershipList(m_oMship.GetMemberList());
+			
+		}
 	}
 	
 	private void SendHBs()
@@ -37,34 +66,20 @@ public class Heartbeat implements Runnable {
 			e.printStackTrace();
 			return;
 		}
-		while(true)
+		while(m_bHB)
 		{
 			long start_time = System.nanoTime();
 			m_oMship.IncrementHeartbeat();
-			ArrayList<String> vUniqueIds = m_oMship.GetMemberIds();
-			int size = vUniqueIds.size();
-			int currGossip = m_nGossipNodes;
-			if(size < m_nGossipNodes) currGossip = size;
-					
-			Set<Integer> rands = Commons.RandomK(currGossip,size);
-			// hack. always ask for k+ 1 and remove self or someother node
-			System.out.println("Heartbeat count: " + String.valueOf(++m_nHBCount));
-			for (Integer i : rands)
-			{
-				String ip = m_oMship.GetIP(vUniqueIds.get(i));
-				HeartBeatProxy proxy = new HeartBeatProxy();
-				proxy.Initialize(ip,m_nHBSendPort);
-				try {
-					proxy.SendMembershipList(m_oMship.GetMemberList());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return;
-				} 
+			try {
+				DoHB();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				return;
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				return;
 			}
 			long diff = (System.nanoTime() - start_time)/1000000;
 			try {

@@ -1,5 +1,6 @@
 package edu.uiuc.cs425;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -107,13 +108,42 @@ public class Controller {
 		return Commons.SUCCESS;
 	}
 	
+	
+	public void LeaveList()
+	{
+		// stop heartbeating 
+		m_oHeartbeat.StopHB();
+		
+		// call to memebership to set node entry to leave status
+		m_oMember.TimeToLeave();
+		// do final HB
+		try {
+			m_oHeartbeat.DoHB();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
 	public int IntroduceSelf()
 	{
 		MemberIntroProxy proxy = new MemberIntroProxy();
-		if (Commons.FAILURE == proxy.Initialize(m_oConfig.IntroducerIP(), m_oConfig.IntroducerPort()))
+		
+		// continous pinging for introducer to connect
+		while(Commons.FAILURE == proxy.Initialize(m_oConfig.IntroducerIP(), m_oConfig.IntroducerPort()))
 		{
-			System.out.println("Failed to initialize proxy to the introducer");
-			return Commons.FAILURE;
+			// sleep 5 secs before next retry
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return Commons.FAILURE;
+			}
 		}
 
 		try {
