@@ -155,40 +155,33 @@ public class Controller {
 	
 	public int IntroduceSelf()
 	{
-		MemberIntroProxy proxy = new MemberIntroProxy();
-		int counter = 0;
-		// continous pinging for introducer to connect
-		while(Commons.FAILURE == proxy.Initialize(m_oConfig.IntroducerIP(), m_oConfig.IntroducerPort(), m_oLogger))
-		{
-			if( counter++ > 100) 
-			{
-				m_oLogger.Error("Failed to connect to Introducer. Exiting after 100 tries");
-				return Commons.FAILURE;
-			}
-			
-			// sleep 5 secs before next retry
-			m_oLogger.Warning("Failed to connect to Introducer. Trying again in 5 secs");
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				m_oLogger.Error(m_oLogger.StackTraceToString(e));
-				return Commons.FAILURE;
-			}
-		}
-
-		try {
-			int successState = proxy.JoinGroup();
-		} catch (TException e) {
-			// TODO Auto-generated catch block
-			m_oLogger.Error(m_oLogger.StackTraceToString(e));
-			return Commons.FAILURE;
-		}
-		
-		// checkpointing will change this part of the logic
 		m_oMember.AddSelf();
 		if(m_sNodeType.equals(Commons.NODE_PARTICIPANT))
 		{
+			MemberIntroProxy proxy = new MemberIntroProxy();
+			int counter = 0;
+			// continous pinging for introducer to connect
+			while(Commons.FAILURE == proxy.Initialize(m_oConfig.IntroducerIP(), m_oConfig.IntroducerPort(), m_oLogger))
+			{
+				if( counter++ > 100) 
+				{
+					m_oLogger.Error("Failed to connect to Introducer. Exiting after 100 tries");
+					return Commons.FAILURE;
+				}
+				
+				// sleep 5 secs before next retry
+				m_oLogger.Warning("Failed to connect to Introducer. Trying again in 5 secs");
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					m_oLogger.Error(m_oLogger.StackTraceToString(e));
+					return Commons.FAILURE;
+				}
+			}
+
+			// checkpointing will change this part of the logic
+			
 			ByteBuffer buf;
 			try {
 				buf = proxy.GetMembershipList();
