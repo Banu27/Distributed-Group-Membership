@@ -17,6 +17,7 @@ public class Controller {
 	private String 			m_sNodeType;
 	private Thread          m_HBThread;
 	private Thread 			m_FailDetThread;
+	private Logger			m_oLogger;
 	
 	public Controller()
 	{
@@ -25,6 +26,7 @@ public class Controller {
 		m_oMember       = new Membership();
 		m_oIntroducer   = null;
 		m_oHeartbeat    = new Heartbeat();
+		m_oLogger		= new Logger();
 	}
 	
 	public int Initialize(String sXML)
@@ -56,7 +58,7 @@ public class Controller {
 		
 		System.out.println("Nodetype: " + m_sNodeType);
 		
-		m_oMember.Initialize(m_oConfig.FailureInterval());
+		m_oMember.Initialize(m_oConfig.FailureInterval(), m_oLogger);
 		
 		if(m_sNodeType.equals(Commons.NODE_INTROCUDER))
 		{
