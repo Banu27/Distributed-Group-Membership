@@ -2,7 +2,10 @@ package edu.uiuc.cs425;
 import edu.uiuc.cs425.MemberIntroImpl;
 
 import org.apache.thrift.TException;
+import org.apache.thrift.server.TNonblockingServer;
 import org.apache.thrift.server.TServer;
+import org.apache.thrift.transport.TNonblockingServerSocket;
+import org.apache.thrift.transport.TNonblockingServerTransport;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 import org.apache.thrift.server.TSimpleServer;
@@ -55,8 +58,8 @@ public class CommServer {
 		m_oIntroServThread = new Thread(new Runnable() {           
             public void run() { 
             	try {
-        			TServerTransport serverTransport = new TServerSocket(nPort);
-        		    TServer server = new TSimpleServer(new TServer.Args(serverTransport).processor(new MemberIntroducer.Processor(m_oIntroImpl)));
+            		TNonblockingServerTransport serverTransport = new TNonblockingServerSocket(nPort);
+        		    TServer server = new TNonblockingServer(new TNonblockingServer.Args(serverTransport).processor(new MemberIntroducer.Processor(m_oIntroImpl)));
         		    server.serve();
         		} catch (TException e)
         		{
