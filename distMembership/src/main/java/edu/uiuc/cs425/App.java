@@ -39,6 +39,14 @@ public class App
 		
 		m_oController.IntroduceSelf();
 		
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
 		m_oController.StartHB();
 		
 		m_oController.StartFailureDetection();
