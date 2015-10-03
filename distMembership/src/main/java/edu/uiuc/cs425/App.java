@@ -26,17 +26,6 @@ public class App
 			System.exit(Commons.FAILURE);
 		}
 		
-		m_oController.StartAllServices();
-		
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.exit(0);
-		}
-		
-		
 		m_oController.IntroduceSelf();
 		
 		try {
@@ -46,6 +35,17 @@ public class App
 			e.printStackTrace();
 			System.exit(0);
 		}
+		
+		m_oController.StartAllServices();
+		
+		
+		/*try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(0);
+		}*/
 		
 		m_oController.StartHB();
 		
