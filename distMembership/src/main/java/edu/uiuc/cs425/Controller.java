@@ -19,7 +19,7 @@ public class Controller {
 	private Thread          m_HBThread;
 	private Thread 			m_FailDetThread;
 	private Logger 			m_oLogger;
-	private static final String sLogPath = "~/mp2/log/log.txt";
+	private static final String sLogPath = "/Users/anirudhnair/mp2/log/log.txt";
 	private Scanner 		m_oUserInput;
 	private String 			introIP;
 	private String 			hostIP;
@@ -37,16 +37,18 @@ public class Controller {
 	
 	public int Initialize(String sXML)
 	{
-		if( Commons.FAILURE == m_oLogger.Initialize(sLogPath))
-		{
-			System.out.println("Failed to Initialize logger object");
-			return Commons.FAILURE;
-		}
+		
 		
 		
 		if( Commons.FAILURE == m_oConfig.Initialize(sXML))
 		{
-			m_oLogger.Error("Failed to Initialize XML");
+			System.out.println("Failed to Initialize XML");
+			return Commons.FAILURE;
+		}
+		
+		if( Commons.FAILURE == m_oLogger.Initialize(m_oConfig.LogPath()))
+		{
+			System.out.println("Failed to Initialize logger object");
 			return Commons.FAILURE;
 		}
 		

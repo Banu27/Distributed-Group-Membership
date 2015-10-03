@@ -16,6 +16,7 @@ import java.io.IOException;
    <Introducer nodeID="0" ip="10.16.8.85" port="9090" />
    <Heartbeat port="8192" interval="2000" gossipNodes="3" /> 
    <Failure interval="3000" />
+   <Logger path="" />
 </MembershipConfig>
  */
 
@@ -26,10 +27,16 @@ public class ConfigAccessor {
 	private int         m_nGossipNodes;
 	private int         m_nHeartBeatPort;
 	private int 		m_nFailureInterval;
+	private String      m_sLogPath;
 	
 	public ConfigAccessor()
 	{
 		
+	}
+	
+	public String       LogPath()
+	{
+		return m_sLogPath;
 	}
 	
 	public String 		IntroducerIP()
@@ -110,6 +117,11 @@ public class ConfigAccessor {
 			{
 				Element eElement = (Element) nNode;
 				m_nFailureInterval  = Integer.parseInt(eElement.getAttribute("interval"));
+			}
+			else if(nNode.getNodeName() == "Logger")
+			{
+				Element eElement = (Element) nNode;
+				m_sLogPath  = eElement.getAttribute("path");
 			}
 		}
 		return Commons.SUCCESS;
