@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
@@ -25,7 +26,7 @@ public class MemberIntroProxy implements Iface {
 	public int Initialize(String sIP,int nPort,Logger oLogger)
 	{
 		m_oLogger	= oLogger;
-		transport = new TSocket(sIP, nPort);
+		transport = new TFramedTransport(new TSocket(sIP, nPort));
 	    try {
 			transport.open();
 		} catch (TTransportException e) {
