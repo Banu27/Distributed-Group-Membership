@@ -156,7 +156,7 @@ public class Membership implements Runnable{
 				//Unseen member
 				if(!member.getHasLeft())
 				{	
-					System.out.println("Adding node to memberlist " + member.getIP() );
+					m_oLogger.Info("Adding node to memberlist " + member.getIP() );
 					String IP = member.getIP();
 					int heartbeatCounter = member.getHeartbeatCounter();
 					long localTime = GetMyLocalTime(); //Our machine localTime
@@ -166,7 +166,7 @@ public class Membership implements Runnable{
 			}
 		}
 		m_oLockW.unlock();
-		PrintList(); //NEEDED?? IN LOGGER???
+		PrintListLogger(); 
 		return Commons.SUCCESS;
 	}
 	
@@ -183,7 +183,23 @@ public class Membership implements Runnable{
 		m_oLockR.unlock();
 		System.out.println("=============================");
 	}
-
+    
+	public void PrintListLogger() // only reading the list
+	{
+		m_oLockR.lock();
+		ArrayList<String> vMembers = GetMemberIds();
+		StringBuffer msg = new StringBuffer();
+		msg.append("============LIST=============\n");
+		for(int i=0; i<vMembers.size(); ++i)
+		{
+			if(!m_oHmap.get(vMembers.get(i)).HasLeft())
+				msg.append(m_oHmap.get(vMembers.get(i)).GetStr());
+		}
+		m_oLockR.unlock();
+		msg.append("===========ENDLIST============");
+		m_oLogger.Info(msg.toString());
+	}
+	
 	public long GetMyLocalTime()
 	{
 		return new Date().getTime();

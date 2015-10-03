@@ -11,8 +11,9 @@ public class Introducer implements Iface { //Why implements Iface??
 	private Membership m_oMembershipObject; //The membership object of the introducer
 	private Logger m_oLogger;
 	
-	public Introducer(Membership member)
+	public Introducer(Membership member,Logger oLogger)
 	{
+		m_oLogger = oLogger;
 		m_oMembershipObject = member;
 		m_oLogger.Info(new String("Introducer is up"));
 	}
@@ -30,7 +31,7 @@ public class Introducer implements Iface { //Why implements Iface??
 			return ByteBuffer.wrap(m_oMembershipObject.GetMemberList());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();	
+			m_oLogger.Error(m_oLogger.StackTraceToString(e));	
 			throw new TException();
 		}
 		

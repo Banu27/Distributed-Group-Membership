@@ -39,6 +39,8 @@ public class App
 		
 		m_oController.IntroduceSelf();
 		
+		m_oController.UserInputImpl();
+		
 		m_oController.WaitForServicesToEnd();
 		
 		

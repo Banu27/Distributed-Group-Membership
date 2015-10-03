@@ -13,19 +13,21 @@ public class Heartbeat implements Runnable {
 	private int 					m_nHBSendPort;
 	private int 					m_nHBCount;
 	private boolean					m_bHB;
+	private Logger					m_oLogger;
 	
-	public int Initialize(Membership oMem, ConfigAccessor oConfig)
+	public int Initialize(Membership oMem, ConfigAccessor oConfig, Logger oLogger)
 	{
-		m_oMship = oMem;
-		m_oConfig = oConfig;
-		m_nHBCount = 0;
+		m_oLogger 				= oLogger;
+		m_oMship 				= oMem;
+		m_oConfig			 	= oConfig;
+		m_nHBCount 				= 0;
 		m_nGossipNodes			= oConfig.GossipNodes();
 		m_nGossipInterval		= oConfig.HeartBeatInterval();
 		m_nHBSendPort			= oConfig.HeartBeatPort();
-		System.out.println("Initialized HeartBeat: GossipNodes=" + String.valueOf(m_nGossipNodes)
+		m_oLogger.Info("Initialized HeartBeat: GossipNodes=" + String.valueOf(m_nGossipNodes)
 					+ " GossipInterval=" + String.valueOf(m_nGossipInterval) +
 					" m_nHBSendPort=" + String.valueOf(m_nHBSendPort));
-		m_bHB      = true;
+		m_bHB      				= true;
 		
 		return Commons.SUCCESS;
 	}
@@ -46,12 +48,12 @@ public class Heartbeat implements Runnable {
 				
 		Set<Integer> rands = Commons.RandomK(currGossip,size);
 		// hack. always ask for k+ 1 and remove self or someother node
-		System.out.println("Heartbeat count: " + String.valueOf(++m_nHBCount));
+		m_oLogger.Info("Heartbeat count: " + String.valueOf(++m_nHBCount));
 		for (Integer i : rands)
 		{
 			String ip = m_oMship.GetIP(vUniqueIds.get(i));
 			HeartBeatProxy proxy = new HeartBeatProxy();
-			proxy.Initialize(ip,m_nHBSendPort);
+			proxy.Initialize(ip,m_nHBSendPort,m_oLogger);
 			proxy.SendMembershipList(m_oMship.GetMemberList());
 			
 		}
@@ -63,7 +65,7 @@ public class Heartbeat implements Runnable {
 			Thread.sleep(m_nGossipInterval); 
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			m_oLogger.Error(m_oLogger.StackTraceToString(e));
 			return;
 		}
 		while(m_bHB)
@@ -74,11 +76,11 @@ public class Heartbeat implements Runnable {
 				DoHB();
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				m_oLogger.Error(m_oLogger.StackTraceToString(e1));
 				return;
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				m_oLogger.Error(m_oLogger.StackTraceToString(e1));
 				return;
 			}
 			long diff = (System.nanoTime() - start_time)/1000000;
@@ -86,7 +88,7 @@ public class Heartbeat implements Runnable {
 				Thread.sleep(m_nGossipInterval - diff);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				m_oLogger.Error(m_oLogger.StackTraceToString(e));
 				return;
 			}
 		}

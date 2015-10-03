@@ -24,6 +24,13 @@ public class MembershipListStruct {
 					+ " " + String.valueOf(m_eState));
 	}
 	
+	public String GetStr()
+	{
+		String str = m_sUniqueId + " " + String.valueOf(m_nHeatbeatCounter) + " " +String.valueOf(m_nLocalTime)
+		+ " " + String.valueOf(m_eState) + "\n";
+		return str;
+	}
+	
 	public void ResetLocalTime(long localTime)
 	{
 		m_nLocalTime = localTime;

@@ -15,30 +15,32 @@ public class CommServer {
 	private HeartBeatReceiver       m_oHBRecvr;
 	private Thread 					m_oIntroServThread;
 	private Thread 					m_oHBRecvrThread;
+	private Logger					m_oLogger;
 	
-	
-	public int Initialize(int nHBPort, Membership oMember, Introducer oIntroducer)
+	public int Initialize(int nHBPort, Membership oMember, Introducer oIntroducer, Logger oLogger)
 	{
 		m_oIntroImpl 		= new MemberIntroImpl();
+		m_oLogger			= oLogger;
 		if( Commons.FAILURE == m_oIntroImpl.Initialize())
 		{
-			System.out.println("Failed to initialize the the thrift introducer");
+			oLogger.Error("Failed to initialize the the thrift introducer");
 			return Commons.FAILURE;
 		}
 		m_oIntroImpl.SetIntoObj(oIntroducer);
 		
 		
-		Initialize(nHBPort,oMember);
+		Initialize(nHBPort,oMember,m_oLogger);
 		return Commons.SUCCESS;
 	}
 	
 	
-	public int Initialize(int nHBPort, Membership oMember)
+	public int Initialize(int nHBPort, Membership oMember, Logger oLogger)
 	{
+		m_oLogger			= oLogger;
 		m_oHBRecvr 			= new HeartBeatReceiver();
-		if( Commons.FAILURE == m_oHBRecvr.Initialize(nHBPort))
+		if( Commons.FAILURE == m_oHBRecvr.Initialize(nHBPort,m_oLogger))
 		{
-			System.out.println("Failed to initialize the heartbeat receiver");
+			m_oLogger.Error("Failed to initialize the heartbeat receiver");
 			return Commons.FAILURE;
 		}
 		m_oHBRecvr.SetMembershipObj(oMember);
@@ -58,7 +60,7 @@ public class CommServer {
         		    server.serve();
         		} catch (TException e)
         		{
-        			e.printStackTrace();
+        			m_oLogger.Error(m_oLogger.StackTraceToString(e));
         		}
         		return;
         	} 
@@ -74,8 +76,8 @@ public class CommServer {
         			m_oHBRecvr.StartService();
         		} catch (Exception e)
         		{
-        			System.out.println("Failed to start the heartbeat receiver");
-        			e.printStackTrace();
+        			m_oLogger.Error("Failed to start the heartbeat receiver");
+        			m_oLogger.Error(m_oLogger.StackTraceToString(e));
         		}
         		return;
         	} 
@@ -91,7 +93,7 @@ public class CommServer {
 			m_oIntroServThread.join();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			m_oLogger.Error(m_oLogger.StackTraceToString(e));
 		}
 	}
 	
@@ -101,7 +103,7 @@ public class CommServer {
 			m_oHBRecvrThread.join();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			m_oLogger.Error(m_oLogger.StackTraceToString(e));
 		}
 	}
 }

@@ -16,8 +16,9 @@ public class HeartBeatReceiver {
 		m_msgBuffer = new byte[2048];
 	}
 	
-	public int Initialize(int nPort)
+	public int Initialize(int nPort, Logger oLogger)
 	{
+		m_oLogger = oLogger;
 		try
         {
                 // DatagramSocket created and listening in 

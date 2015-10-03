@@ -12,22 +12,23 @@ public class HeartBeatProxy {
 	private DatagramSocket  m_oSocket;
 	private InetAddress     m_oHost;
 	private int				m_Port;
+	private Logger 			m_oLogger;
 	
-	
-	public int Initialize(String ip, int port)
+	public int Initialize(String ip, int port, Logger oLogger)
 	{
-		 try {
+		m_oLogger = oLogger;
+		try {
 			m_oSocket = new DatagramSocket();
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			m_oLogger.Error(m_oLogger.StackTraceToString(e));
 			return Commons.FAILURE;
 		}
 		 try {
 			m_oHost       			= InetAddress.getByName(ip);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			m_oLogger.Error(m_oLogger.StackTraceToString(e));
 			return Commons.FAILURE;
 		}
 		 m_Port = port;

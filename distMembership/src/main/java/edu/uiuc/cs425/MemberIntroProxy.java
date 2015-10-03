@@ -22,8 +22,9 @@ public class MemberIntroProxy implements Iface {
 		m_oClient = null;
 	}
 	
-	public int Initialize(String sIP,int nPort)
+	public int Initialize(String sIP,int nPort,Logger oLogger)
 	{
+		m_oLogger	= oLogger;
 		transport = new TSocket(sIP, nPort);
 	    try {
 			transport.open();
