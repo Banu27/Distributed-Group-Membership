@@ -95,6 +95,7 @@ public class Membership implements Runnable{
 	         Member.Builder member = Member.newBuilder();
 	         member.setHeartbeatCounter(memberStruct.GetHeartbeatCounter());
 	         member.setIP(memberStruct.GetIP());
+	         member.setHasLeft(memberStruct.HasLeft());
 	         member.setLocalTime(memberStruct.GetLocalTime());
 	         member.setUniqueId(memberStruct.GetUniqueId());
 	         memberList.add(member.build());
@@ -122,21 +123,32 @@ public class Membership implements Runnable{
 			{
 				MembershipListStruct matchedMember = m_oHmap.get(member.getUniqueId());
 				//> Can never happen for self
-				if(member.getHeartbeatCounter() > matchedMember.GetHeartbeatCounter())
+				if(member.getHasLeft())
 				{
-					matchedMember.ResetHeartbeatCounter(member.getHeartbeatCounter());
+					matchedMember.setAsLeft();
 					matchedMember.ResetLocalTime(GetMyLocalTime());
+				}
+				if(!matchedMember.HasLeft())
+				{
+					if(member.getHeartbeatCounter() > matchedMember.GetHeartbeatCounter())
+					{
+						matchedMember.ResetHeartbeatCounter(member.getHeartbeatCounter());
+						matchedMember.ResetLocalTime(GetMyLocalTime());
+					}
 				}
 			}
 			else
 			{
 				//Unseen member
-				System.out.println("Adding node to memberlist " + member.getIP() );
-				String IP = member.getIP();
-				int heartbeatCounter = member.getHeartbeatCounter();
-				long localTime = GetMyLocalTime(); //Our machine localTime
-				String uniqueId = member.getUniqueId();
-				AddMemberToStruct(uniqueId, IP, heartbeatCounter, localTime);
+				if(!member.getHasLeft())
+				{	
+					System.out.println("Adding node to memberlist " + member.getIP() );
+					String IP = member.getIP();
+					int heartbeatCounter = member.getHeartbeatCounter();
+					long localTime = GetMyLocalTime(); //Our machine localTime
+					String uniqueId = member.getUniqueId();
+					AddMemberToStruct(uniqueId, IP, heartbeatCounter, localTime);
+				}
 			}
 		}
 		m_oLockW.unlock();
@@ -150,7 +162,8 @@ public class Membership implements Runnable{
 		System.out.println("=============================");
 		for(int i=0; i<vMembers.size(); ++i)
 		{
-			m_oHmap.get(vMembers.get(i)).Print();
+			if(!m_oHmap.get(vMembers.get(i)).HasLeft())
+				m_oHmap.get(vMembers.get(i)).Print();
 		}
 		System.out.println("=============================");
 	}
@@ -197,7 +210,7 @@ public class Membership implements Runnable{
 				MembershipListStruct memberStruct = m_oHmap.get(mentry.getKey());
 				if(!memberStruct.GetUniqueId().equals(m_sUniqueId));
 				{
-					if(memberStruct.IsSuspect())
+					if(memberStruct.IsSuspect() || memberStruct.HasLeft())
 					{
 						if(memberStruct.GetLocalTime() - GetMyLocalTime() > 2*m_nTfail)
 						{
@@ -217,6 +230,12 @@ public class Membership implements Runnable{
 		}
 	}
 
+	public int TimeToLeave()
+	{
+		m_oHmap.get(m_sUniqueId).setAsLeft();
+		return Commons.SUCCESS;
+	}
+	
 	//Read lock
 	 public ArrayList<String> GetMemberIds() 
 	 {

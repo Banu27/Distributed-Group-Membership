@@ -6,7 +6,7 @@ public class MembershipListStruct {
 	String 			m_sIP;
 	int 			m_nHeatbeatCounter;
 	long 			m_nLocalTime;
-	boolean 		m_bSuspect;
+	STATE 			m_eState;
 	
 	public MembershipListStruct(String IP, String uniqueId, int heartbeatCounter, long localTime)
 	{
@@ -14,13 +14,13 @@ public class MembershipListStruct {
 		m_sIP = IP;
 		m_nHeatbeatCounter = heartbeatCounter;
 		m_nLocalTime = localTime;
-		m_bSuspect = false;
+		m_eState = STATE.ALIVE;
 	}
 	
 	public void Print()
 	{
 		System.out.println(m_sUniqueId + " " + String.valueOf(m_nHeatbeatCounter) + " " +String.valueOf(m_nLocalTime)
-					+ " " + String.valueOf(m_bSuspect));
+					+ " " + String.valueOf(m_eState));
 	}
 	
 	public void ResetLocalTime(long localTime)
@@ -50,17 +50,25 @@ public class MembershipListStruct {
 	
 	public boolean IsSuspect()
 	{
-		return m_bSuspect;
+		return (m_eState == STATE.SUSPECT);
 	}
 		
 	public void setAsSuspect()
 	{
-		m_bSuspect = true;
+		m_eState = STATE.SUSPECT;
 	}
 	
 	public String GetIP()
 	{
 		return m_sIP;
 	}
+	public boolean HasLeft()
+	{
+		return (m_eState == STATE.LEFT);
+	}
 	
+	public void setAsLeft()
+	{
+		m_eState = STATE.LEFT;
+	}
 }
