@@ -82,7 +82,7 @@ public class Membership implements Runnable{
 	public void AddMemberToStruct(String uniqueId, String IP, int heartbeatCounter, long localTime)
 	{
 		//No write lock. Write lock present in Merge.
-		MembershipListStruct newMember = new MembershipListStruct(uniqueId, IP, heartbeatCounter, localTime);
+		MembershipListStruct newMember = new MembershipListStruct(IP, uniqueId, heartbeatCounter, localTime);
 		m_oHmap.put(uniqueId,newMember);
 		m_oLogger.Info(new String("Added new member to current memberlist : " + uniqueId));
 	}

@@ -253,7 +253,7 @@ public class Controller {
 	        		if( ! sInput.equals("1") && !sInput.equals("2") && !sInput.equals("3"))
 	        		{
 	        			System.out.println("Invalid input");
-	        			return;
+	        			continue;
 	        		}
 	        		
 	        		if(sInput.equals("1"))
