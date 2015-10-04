@@ -3,5 +3,6 @@
    <Introducer ip="10.0.0.11" port="8342" />
    <Heartbeat port="7954" interval="2000" gossipNodes="3" /> 
    <Failure interval="2000" />
+   <Loss rate="3"/>
    <Logger path="" />
 </MembershipConfig>

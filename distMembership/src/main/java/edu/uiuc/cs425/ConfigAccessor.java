@@ -29,7 +29,7 @@ public class ConfigAccessor {
 	private int 		m_nFailureInterval;
 	private String      m_sLogPath;
 	private String      m_sCPPath;
-	
+	private int			m_nLossRate;
 	
 	public ConfigAccessor()
 	{
@@ -49,6 +49,11 @@ public class ConfigAccessor {
 	public int 		IntroducerPort()
 	{
 		return m_nIntroducerPort;
+	}
+	
+	public int 		LossRate()
+	{
+		return m_nLossRate;
 	}
 	
 	public int         HeartBeatInterval()
@@ -125,6 +130,11 @@ public class ConfigAccessor {
 				Element eElement = (Element) nNode;
 				m_nFailureInterval  = Integer.parseInt(eElement.getAttribute("interval"));
 				m_sCPPath			= eElement.getAttribute("checkPoint");
+			}
+			else if(nNode.getNodeName() == "Loss")
+			{
+				Element eElement = (Element) nNode;
+				m_nLossRate = Integer.parseInt(eElement.getAttribute("Rate"));
 			}
 			else if(nNode.getNodeName() == "Logger")
 			{

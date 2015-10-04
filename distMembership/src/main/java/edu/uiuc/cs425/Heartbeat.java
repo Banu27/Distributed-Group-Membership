@@ -2,6 +2,7 @@ package edu.uiuc.cs425;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
 
@@ -14,6 +15,8 @@ public class Heartbeat implements Runnable {
 	private int 					m_nHBCount;
 	private boolean					m_bHB;
 	private Logger					m_oLogger;
+	private int						m_nLossRate;
+	private Random 					m_oRands; 
 	
 	public int Initialize(Membership oMem, ConfigAccessor oConfig, Logger oLogger)
 	{
@@ -24,6 +27,9 @@ public class Heartbeat implements Runnable {
 		m_nGossipNodes			= oConfig.GossipNodes();
 		m_nGossipInterval		= oConfig.HeartBeatInterval();
 		m_nHBSendPort			= oConfig.HeartBeatPort();
+		m_nLossRate 			= oConfig.LossRate();
+		m_oRands 				= new Random();
+		
 		m_oLogger.Info("Initialized HeartBeat: GossipNodes=" + String.valueOf(m_nGossipNodes)
 					+ " GossipInterval=" + String.valueOf(m_nGossipInterval) +
 					" m_nHBSendPort=" + String.valueOf(m_nHBSendPort));
@@ -110,7 +116,9 @@ public class Heartbeat implements Runnable {
 			long start_time = System.nanoTime();
 			m_oMship.IncrementHeartbeat();
 			try {
-				DoHB();
+				int randNum = m_oRands.nextInt(100);
+				if(randNum > m_nLossRate)
+					DoHB();
 			} 
 			// only catch the exception. There could be nodes that 
 			// fail and will not connect. That is alright. Catch 
