@@ -115,13 +115,15 @@ public class Membership implements Runnable{
 	    while(iterator.hasNext()) {
 	         Map.Entry mentry = (Map.Entry)iterator.next();
 	         MembershipListStruct memberStruct = (MembershipListStruct) mentry.getValue(); //m_oHmap.get(mentry.getKey());
-	         Member.Builder member = Member.newBuilder();
-	         member.setHeartbeatCounter(memberStruct.GetHeartbeatCounter());
-	         member.setIP(memberStruct.GetIP());
-	         member.setHasLeft(memberStruct.HasLeft());
-	         member.setLocalTime(memberStruct.GetLocalTime());
-	         member.setUniqueId(memberStruct.GetUniqueId());
-	         memberList.add(member.build());
+	         if(!memberStruct.IsSuspect())
+	         {	Member.Builder member = Member.newBuilder();
+	         	member.setHeartbeatCounter(memberStruct.GetHeartbeatCounter());
+	         	member.setIP(memberStruct.GetIP());
+	         	member.setHasLeft(memberStruct.HasLeft());
+	         	member.setLocalTime(memberStruct.GetLocalTime());
+	         	member.setUniqueId(memberStruct.GetUniqueId());
+	         	memberList.add(member.build());
+	         }
 	    }	      
 		memberListBuilder.addAllMember(memberList);
 		m_oLockR.unlock();
