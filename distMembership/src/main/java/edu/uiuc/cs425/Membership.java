@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.io.ByteArrayOutputStream;
@@ -39,20 +40,24 @@ public class Membership implements Runnable{
 	private Lock 										m_oLockR; 
 	private Lock 										m_oLockW; 
 	private Logger										m_oLogger;
-	
+	private int											m_nFailChk;
+	private PrintWriter								    m_oWriter;
+	private ConfigAccessor 								m_oAccessor;
 	public String UniqueId()
 	{
 		return m_sUniqueId;
 	}
 	
-	public int Initialize(int tFail, Logger logger)
+	public int Initialize(ConfigAccessor oAccessor, Logger logger)
 	{
+		m_oAccessor = oAccessor;
 		m_oHmap 		= new HashMap<String, MembershipListStruct>();
 		m_nMyHeartBeat  = 0;
+		m_nFailChk = 0;
 		m_oReadWriteLock = new ReentrantReadWriteLock();
 		m_oLockR = m_oReadWriteLock.readLock();
 		m_oLockW = m_oReadWriteLock.writeLock();
-		m_nTfail = tFail;
+		m_nTfail = m_oAccessor.FailureInterval();
 		m_oLogger = logger;
 		
 		try {
@@ -238,12 +243,15 @@ public class Membership implements Runnable{
 			// TODO Auto-generated catch block
 			m_oLogger.Error(m_oLogger.StackTraceToString(e1));
 		}
+		ArrayList<String> sIps = new ArrayList<String>();
 		while(true) {
-			
+			m_nFailChk++;
 			long start_time = System.nanoTime();
 			Set<Entry<String, MembershipListStruct>> set = m_oHmap.entrySet();
 		    Iterator<Entry<String, MembershipListStruct>> iterator = set.iterator();
-
+		    
+		    if(m_nFailChk % 5 == 0)
+		    	sIps.clear();
 		    while(iterator.hasNext()) {
 		    
 		    	//write lock since the members could be removed or set as suspect
@@ -252,6 +260,7 @@ public class Membership implements Runnable{
 		        
 		        if(!memberStruct.GetUniqueId().equals(m_sUniqueId))
 				{
+		        	sIps.add(memberStruct.GetIP());
 					if((memberStruct.IsSuspect() || memberStruct.HasLeft()) 
 							&& ((GetMyLocalTime() - memberStruct.GetLocalTime()) > 2*m_nTfail))
 					{	 
@@ -278,6 +287,22 @@ public class Membership implements Runnable{
 				// TODO Auto-generated catch block
 				m_oLogger.Error(m_oLogger.StackTraceToString(e));
 				return;
+			}
+			
+			if(m_nFailChk % 5 == 0)
+			{
+				m_oLogger.Info("Checkpointing IPs");
+				try {
+					m_oWriter = new PrintWriter(m_oAccessor.GetCPPath(), "UTF-8");
+					String ipCSV = sIps.toString();
+					m_oWriter.print(ipCSV.substring(1, ipCSV.length() - 1));
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					m_oLogger.Error(m_oLogger.StackTraceToString(e1));
+				} catch (UnsupportedEncodingException e1) {
+					// TODO Auto-generated catch block
+					m_oLogger.Error(m_oLogger.StackTraceToString(e1));
+				}
 			}
 			
 		}

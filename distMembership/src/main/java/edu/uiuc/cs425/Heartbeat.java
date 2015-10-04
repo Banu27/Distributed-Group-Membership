@@ -37,7 +37,7 @@ public class Heartbeat implements Runnable {
 		m_bHB = false;
 	}
 	
-	public void DoHB() throws IOException, Exception
+	public void DoHB()
 	{
 		ArrayList<String> vUniqueIds = m_oMship.GetMemberIds();
 		String myID = m_oMship.UniqueId();
@@ -53,9 +53,46 @@ public class Heartbeat implements Runnable {
 		{
 			String ip = m_oMship.GetIP(vUniqueIds.get(i));
 			HeartBeatProxy proxy = new HeartBeatProxy();
-			proxy.Initialize(ip,m_nHBSendPort,m_oLogger);
-			proxy.SendMembershipList(m_oMship.GetMemberList());
+			if( proxy.Initialize(ip,m_nHBSendPort,m_oLogger) == Commons.SUCCESS )
+			{
+				try {
+					proxy.SendMembershipList(m_oMship.GetMemberList());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					m_oLogger.Error(m_oLogger.StackTraceToString(e));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					m_oLogger.Error(m_oLogger.StackTraceToString(e));
+				} // continue after exception
+			}
 			
+		}
+	}
+	
+	public void SendHB(String [] sIPs)
+	{
+		byte[] buf;
+		try {
+			buf = m_oMship.GetMemberList();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			return;
+		}
+		for (String sIP: sIPs) {  
+			HeartBeatProxy proxy = new HeartBeatProxy();
+			if( proxy.Initialize(sIP,m_nHBSendPort,m_oLogger) == Commons.SUCCESS )
+			{
+				try {
+					proxy.SendMembershipList(buf);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} // continue after exception
+			}
 		}
 	}
 	
@@ -74,14 +111,14 @@ public class Heartbeat implements Runnable {
 			m_oMship.IncrementHeartbeat();
 			try {
 				DoHB();
-			} catch (IOException e1) {
+			} 
+			// only catch the exception. There could be nodes that 
+			// fail and will not connect. That is alright. Catch 
+			// and continue
+			catch (Exception e1) {
 				// TODO Auto-generated catch block
 				m_oLogger.Error(m_oLogger.StackTraceToString(e1));
-				return;
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				m_oLogger.Error(m_oLogger.StackTraceToString(e1));
-				return;
+				//return;
 			}
 			long diff = (System.nanoTime() - start_time)/1000000;
 			try {

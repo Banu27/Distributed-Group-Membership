@@ -1,5 +1,9 @@
 package edu.uiuc.cs425;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -71,7 +75,7 @@ public class Controller {
 		
 		m_oLogger.Info("Nodetype: " + m_sNodeType);
 		
-		m_oMember.Initialize(m_oConfig.FailureInterval(), m_oLogger);
+		m_oMember.Initialize(m_oConfig, m_oLogger);
 		
 		if(m_sNodeType.equals(Commons.NODE_INTROCUDER))
 		{
@@ -142,10 +146,7 @@ public class Controller {
 		// do final HB
 		try {
 			m_oHeartbeat.DoHB();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			m_oLogger.Error(m_oLogger.StackTraceToString(e));
-		} catch (Exception e) {
+		}  catch (Exception e) {
 			// TODO Auto-generated catch block
 			m_oLogger.Error(m_oLogger.StackTraceToString(e));
 		}
@@ -200,8 +201,46 @@ public class Controller {
 				return Commons.FAILURE;
 			}
 		}
-		return Commons.SUCCESS;
 		
+		// recover from checkpoint
+		RecoverFromCheckPoint();
+		return Commons.SUCCESS;
+	}
+	
+	private int RecoverFromCheckPoint()
+	{
+		if(m_sNodeType.equals(Commons.NODE_INTROCUDER))
+		{
+			File fCP = new File(m_oConfig.GetCPPath());
+			if(fCP.exists())
+			{
+				System.out.println("Checkpoint data found. Do you want to recover? Yes/No");
+				String sInput = m_oUserInput.nextLine();
+				if(sInput.equalsIgnoreCase("yes"))
+				{
+					try {
+						BufferedReader brCP = new BufferedReader(new FileReader(m_oConfig.GetCPPath()));
+						String text = brCP.readLine();
+						String[] strArray = text.split(",");
+						m_oHeartbeat.SendHB(strArray);
+					} catch (FileNotFoundException e) {
+						m_oLogger.Error(m_oLogger.StackTraceToString(e));
+						return Commons.FAILURE;
+					} catch (IOException e) {
+						m_oLogger.Error(m_oLogger.StackTraceToString(e));
+						return Commons.FAILURE;
+					}
+				} else if(sInput.equalsIgnoreCase("no"))
+				{
+					System.out.println("Not recovering");
+					// do nothing as of now
+				} else
+				{
+					System.out.println("Invalid input. Not recovering");
+				}
+			}
+		}
+		return Commons.SUCCESS;
 	}
 	
 	public void WaitForServicesToEnd()
