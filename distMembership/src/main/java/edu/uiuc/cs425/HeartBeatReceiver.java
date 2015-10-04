@@ -11,9 +11,11 @@ public class HeartBeatReceiver {
 	private DatagramPacket  m_packet;
 	private Membership		m_oMembership;
 	private Logger 			m_oLogger;
+	private int				m_nCounter;
 	
 	public HeartBeatReceiver() {
 		m_msgBuffer = new byte[2048];
+		m_nCounter = 0;
 	}
 	
 	public int Initialize(int nPort, Logger oLogger)
@@ -51,6 +53,7 @@ public class HeartBeatReceiver {
          {
 			 try {
 				m_socket.receive(m_packet);
+				m_oLogger.Info("BENCHMARK: Message count: " + String.valueOf(++m_nCounter));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				m_oLogger.Error(m_oLogger.StackTraceToString(e));
