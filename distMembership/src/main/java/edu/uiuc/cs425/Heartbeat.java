@@ -52,7 +52,7 @@ public class Heartbeat implements Runnable {
 		int currGossip = m_nGossipNodes;
 		if(size < m_nGossipNodes) currGossip = size;
 				
-		Set<Integer> rands = Commons.RandomK(currGossip,size);
+		Set<Integer> rands = Commons.RandomK(currGossip,size,m_oMship.GetMyLocalTime());
 		// hack. always ask for k+ 1 and remove self or someother node
 		m_oLogger.Info("Heartbeat count: " + String.valueOf(++m_nHBCount));
 		for (Integer i : rands)

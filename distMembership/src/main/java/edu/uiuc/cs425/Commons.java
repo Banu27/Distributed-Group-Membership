@@ -29,9 +29,9 @@ public final class Commons {
 
 	
 	//Floyd's - Random 
-	static Set<Integer> RandomK(int m, int max)
+	static Set<Integer> RandomK(int m, int max, long seed)
 	{
-		Random rnd = new Random();
+		Random rnd = new Random(seed);
 		int n = max;
 		HashSet<Integer> res = new HashSet<Integer>(m);
 	    for(int i = n - m; i < n; i++){
