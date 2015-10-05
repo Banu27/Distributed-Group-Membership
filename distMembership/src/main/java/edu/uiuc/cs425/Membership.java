@@ -43,6 +43,8 @@ public class Membership implements Runnable{
 	private int											m_nFailChk;
 	private PrintWriter								    m_oWriter;
 	private ConfigAccessor 								m_oAccessor;
+	
+	
 	public String UniqueId()
 	{
 		return m_sUniqueId;
@@ -251,7 +253,7 @@ public class Membership implements Runnable{
 			long start_time = System.nanoTime();
 			Set<Entry<String, MembershipListStruct>> set = m_oHmap.entrySet();
 		    Iterator<Entry<String, MembershipListStruct>> iterator = set.iterator();
-		    
+		    m_oLogger.Info("BENCHMARK: Failure check count: " + String.valueOf(m_nFailChk));
 		    if(m_nFailChk % 5 == 0)
 		    	sIps.clear();
 		    while(iterator.hasNext()) {
